@@ -19,7 +19,6 @@
 #include <nori/warp.h>
 #include <nori/vector.h>
 #include <nori/frame.h>
-#include <Eigen/src/Geometry/Rotation2D.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -32,7 +31,8 @@ float Warp::squareToUniformSquarePdf(const Point2f &sample) {
 }
 
 Point2f Warp::squareToTent(const Point2f &sample) {
-    throw NoriException("Warp::squareToTent() is not yet implemented!");
+	float su0 = std::sqrt(sample.x());
+	return Point2f(1 - su0, sample.y() * su0);
 }
 
 float Warp::squareToTentPdf(const Point2f &p) {
@@ -40,31 +40,42 @@ float Warp::squareToTentPdf(const Point2f &p) {
 }
 
 Point2f Warp::squareToUniformDisk(const Point2f &sample) {
-	return sample;
+	float r = std::sqrt(sample.x());
+	float theta = 2.0f * M_PI * sample.y();
+	return Point2f(r * std::cos(theta), r * std::sin(theta));
 }
 
 float Warp::squareToUniformDiskPdf(const Point2f &p) {
-	return ((p.array() >= 0).all() && (p.array() <= 1).all()) ? 1.0f : 0.0f;
+	return 0; //TODO
 }
 
 Vector3f Warp::squareToUniformSphere(const Point2f &sample) {
-    throw NoriException("Warp::squareToUniformSphere() is not yet implemented!");
+	float z = 1.0f - 2.0f * sample.x();
+	float r = std::sqrt(std::max(0.0f, 1.0f - z * z));
+	float phi = 2.0f * M_PI * sample.y();
+	return Vector3f(r * std::cos(phi), r * std::sin(phi), z);
 }
 
 float Warp::squareToUniformSpherePdf(const Vector3f &v) {
-    throw NoriException("Warp::squareToUniformSpherePdf() is not yet implemented!");
+	return 1.0f / (4.0f * M_PI);
 }
 
 Vector3f Warp::squareToUniformHemisphere(const Point2f &sample) {
-    throw NoriException("Warp::squareToUniformHemisphere() is not yet implemented!");
+	float z = sample.x();
+	float r = std::sqrt(std::max(0.0f, 1.0f - z * z)); 
+	float phi = 2.0f * M_PI * sample.y();
+	return Vector3f(r * std::cos(phi), r * std::sin(phi), z);
 }
 
 float Warp::squareToUniformHemispherePdf(const Vector3f &v) {
-    throw NoriException("Warp::squareToUniformHemispherePdf() is not yet implemented!");
+	return 1.0f / (2.0f * M_PI);
+
 }
 
 Vector3f Warp::squareToCosineHemisphere(const Point2f &sample) {
-    throw NoriException("Warp::squareToCosineHemisphere() is not yet implemented!");
+	Point2f d = squareToUniformDisk(sample);
+	float z = std::sqrt(std::max(0.0f, 1.0f - d.x() * d.x() - d.y() * d.y()));
+	return Vector3f(d.x(), d.y(), z);
 }
 
 float Warp::squareToCosineHemispherePdf(const Vector3f &v) {
