@@ -36,23 +36,44 @@ Point2f Warp::squareToTent(const Point2f &sample) {
 }
 
 float Warp::squareToTentPdf(const Point2f &p) {
-    throw NoriException("Warp::squareToTentPdf() is not yet implemented!");
+	if (p.x() + p.y() <= 1)
+	{
+		return 0;
+	} else
+	{
+		return 2;
+	}
 }
 
 Point2f Warp::squareToUniformDisk(const Point2f &sample) {
-	float r = std::sqrt(sample.x());
-	float theta = 2.0f * M_PI * sample.y();
-	return Point2f(r * std::cos(theta), r * std::sin(theta));
+	Point2f uOffset = 2.f * sample - Vector2f(1, 1);
+
+	if (uOffset.x() == 0 && uOffset.y() == 0) return Point2f(0, 0);
+
+	float theta, r;
+	if (std::abs(uOffset.x()) > std::abs(uOffset.y()))
+	{
+		r = uOffset.x(); theta = M_PI / 4.0f * (uOffset.y() / uOffset.x());
+	}
+	else
+	{
+		r = uOffset.y(); theta = M_PI_2 - M_PI / 4.0f * (uOffset.x() / uOffset.y());
+	} return r * Point2f(std::cos(theta), std::sin(theta));
 }
 
 float Warp::squareToUniformDiskPdf(const Point2f &p) {
-	return 0; //TODO
+	if (p.norm() <= 1) {
+		return 1.0f / M_PI;
+	} else
+	{
+		return 0.0f;
+	}
 }
 
 Vector3f Warp::squareToUniformSphere(const Point2f &sample) {
-	float z = 1.0f - 2.0f * sample.x();
+	float z = 1 - 2 * sample.x();
 	float r = std::sqrt(std::max(0.0f, 1.0f - z * z));
-	float phi = 2.0f * M_PI * sample.y();
+	float phi = 2 * M_PI * sample.y();
 	return Vector3f(r * std::cos(phi), r * std::sin(phi), z);
 }
 
@@ -61,14 +82,23 @@ float Warp::squareToUniformSpherePdf(const Vector3f &v) {
 }
 
 Vector3f Warp::squareToUniformHemisphere(const Point2f &sample) {
-	float z = sample.x();
-	float r = std::sqrt(std::max(0.0f, 1.0f - z * z)); 
-	float phi = 2.0f * M_PI * sample.y();
-	return Vector3f(r * std::cos(phi), r * std::sin(phi), z);
+	float teta = std::acos(sample.x());
+	float phi = 2 * M_PI * sample.y();
+
+	float x = std::sin(teta) * std::cos(phi);
+	float y = std::sin(teta) * std::sin(phi);
+	float z = std::cos(teta);
+
+	return { x,y,z };
 }
 
 float Warp::squareToUniformHemispherePdf(const Vector3f &v) {
-	return 1.0f / (2.0f * M_PI);
+	if (v.z() >= 0) {
+		return 1.0f / (2.0f * M_PI);
+	} else
+	{
+		return 0.0f;
+	}
 
 }
 
