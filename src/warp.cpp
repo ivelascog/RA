@@ -36,12 +36,12 @@ Point2f Warp::squareToTent(const Point2f &sample) {
 }
 
 float Warp::squareToTentPdf(const Point2f &p) {
-	if (p.x() + p.y() <= 1)
-	{
-		return 0;
-	} else
+	if (p.y() >= 0 && p.x() >= 0 && p.x() + p.y() <= 1)
 	{
 		return 2;
+	} else
+	{
+		return 0;
 	}
 }
 
@@ -109,7 +109,15 @@ Vector3f Warp::squareToCosineHemisphere(const Point2f &sample) {
 }
 
 float Warp::squareToCosineHemispherePdf(const Vector3f &v) {
-    throw NoriException("Warp::squareToCosineHemispherePdf() is not yet implemented!");
+
+	
+   if (v.z() >= 0)
+   {
+	   return v.z() / v.norm() / M_PI;
+   } else
+   {
+	   return 0.0f;
+   }
 }
 
 Vector3f Warp::squareToBeckmann(const Point2f &sample, float alpha) {
