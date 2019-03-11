@@ -113,7 +113,7 @@ float Warp::squareToCosineHemispherePdf(const Vector3f &v) {
 	
    if (v.z() >= 0)
    {
-	   return v.z() / v.norm() / M_PI;
+	   return v.z() / M_PI;
    } else
    {
 	   return 0.0f;

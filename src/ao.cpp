@@ -20,12 +20,12 @@ public:
 		sampler->generate();
 		Vector3f d = Warp::squareToCosineHemisphere(sampler->next2D());
 		Vector3f n = its.shFrame.n;
-    const float p = Warp::squareToCosineHemispherePdf(d);
+		const float p = Warp::squareToCosineHemispherePdf(d);
 		d = its.shFrame.toWorld(d);
 
 		const Ray3f aoRay(its.p, d, 0, std::numeric_limits<float>::max());
 
-    return scene->rayIntersect(aoRay) ? Color3f{ 0, 0, 0 } : Color3f{ 1.0f, 1.0f, 1.0f } /** n.dot(d) * p / M_PI*/;
+		return scene->rayIntersect(aoRay) ? Color3f{ 0, 0, 0 } : Color3f{ 1.0f, 1.0f, 1.0f } * n.dot(d) /M_PI/p;
 	}
 
 	/// Return a human-readable description for debugging purposes
