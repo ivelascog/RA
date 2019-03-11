@@ -101,6 +101,24 @@ Point3f Mesh::getCentroid(uint32_t index) const {
          m_V.col(m_F(2, index)));
 }
 
+/**
+ * \brief Uniformly sample a position on the mesh with
+ * respect to surface area. Returns both position and normal
+ */
+void Mesh::samplePosition(const Point2f &sample, Point3f &p, Normal3f &n) const
+{
+
+}
+
+/// Return the surface area of the given triangle
+float Mesh::pdf(const Point3f &p) const
+{
+	return 1;
+}
+
+
+
+
 void Mesh::addChild(NoriObject *obj) {
     switch (obj->getClassType()) {
         case EBSDF:

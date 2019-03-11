@@ -87,6 +87,7 @@ add_executable(nori
   src/mirror.cpp
   src/dielectric.cpp
   src/normals.cpp
+  src/area.cpp
   src/ao.cpp
 )
 

@@ -55,6 +55,15 @@ void Scene::activate() {
     cout << endl;
 }
 
+/// Sample emitter
+const Emitter * Scene::sampleEmitter(float rnd, float &pdf) const {
+	auto const & n = m_emitters.size();
+	size_t index = std::min(static_cast<size_t>(std::floor(n*rnd)), n - 1);
+	pdf = 1 / n;
+	return m_emitters[index];
+}
+
+
 void Scene::addChild(NoriObject *obj) {
     switch (obj->getClassType()) {
         case EMesh: {
@@ -65,10 +74,16 @@ void Scene::addChild(NoriObject *obj) {
             break;
         
         case EEmitter: {
-                //Emitter *emitter = static_cast<Emitter *>(obj);
-                /* TBD */
-                throw NoriException("Scene::addChild(): You need to implement this for emitters");
-            }
+				Emitter *emitter = static_cast<Emitter *>(obj);
+				if (emitter->getEmitterType() == EmitterType::EMITTER_ENVIRONMENT)
+				{
+					if (m_enviromentalEmitter)
+						throw NoriException("There can only be one enviromental emitter per scene!");
+					m_enviromentalEmitter = emitter;
+				}
+				else
+					m_emitters.push_back(emitter);
+			}
             break;
 
         case ESampler:
@@ -95,6 +110,12 @@ void Scene::addChild(NoriObject *obj) {
     }
 }
 
+Color3f Scene::getBackground(const Ray3f& ray) const
+{
+	return Color3f(0.0f);
+}
+
+
 std::string Scene::toString() const {
     std::string meshes;
     for (size_t i=0; i<m_meshes.size(); ++i) {
@@ -104,6 +125,15 @@ std::string Scene::toString() const {
         meshes += "\n";
     }
 
+	std::string lights;
+	for (size_t i = 0; i < m_emitters.size(); ++i) {
+		lights += std::string("  ") + indent(m_emitters[i]->toString(), 2);
+		if (i + 1 < m_emitters.size())
+			lights += ",";
+		lights += "\n";
+	}
+
+
     return tfm::format(
         "Scene[\n"
         "  integrator = %s,\n"
@@ -111,11 +141,14 @@ std::string Scene::toString() const {
         "  camera = %s,\n"
         "  meshes = {\n"
         "  %s  }\n"
+		"  emitters = {\n"
+		"  %s  }\n"
         "]",
         indent(m_integrator->toString()),
         indent(m_sampler->toString()),
         indent(m_camera->toString()),
-        indent(meshes, 2)
+        indent(meshes, 2),
+		indent(lights, 2)
     );
 }
 

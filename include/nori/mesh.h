@@ -91,6 +91,10 @@ public:
      */
     void samplePosition(const Point2f &sample, Point3f &p, Normal3f &n) const;
 
+	/// Return the surface area of the given triangle
+	float pdf(const Point3f &p) const;
+
+
     /// Return the surface area of the given triangle
     float surfaceArea(uint32_t index) const;
 
