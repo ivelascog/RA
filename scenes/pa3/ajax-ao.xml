@@ -1,7 +1,7 @@
 <scene>
 	<!-- Independent sample generator, 32 samples per pixel -->
 	<sampler type="independent">
-		<integer name="sampleCount" value="1024"/>
+		<integer name="sampleCount" value="256"/>
 	</sampler>
 
 	<!-- Use the ambient occlusion integrator -->
@@ -27,7 +27,7 @@
 		<float name="fov" value="30"/>
 
 		<!-- 768 x 768 pixels -->
-		<integer name="width" value="4096"/>
-		<integer name="height" value="4096"/>
+		<integer name="width" value="800"/>
+		<integer name="height" value="800"/>
 	</camera>
 </scene>

@@ -22,7 +22,7 @@ public:
 		Vector3f n = its.shFrame.n;
 		d = its.shFrame.toWorld(d);
 
-		const Ray3f aoRay(its.p, d, 0, 0xFFFFFFFFF);
+		const Ray3f aoRay(its.p, d, 0, std::numeric_limits<float>::max());
 
 		return scene->rayIntersect(aoRay) ? Color3f{ 0, 0, 0 } : Color3f{ 1.0f, 1.0f, 1.0f } *n.dot(d);
 	}
