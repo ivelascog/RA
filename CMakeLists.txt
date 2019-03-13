@@ -89,6 +89,7 @@ add_executable(nori
   src/normals.cpp
   src/area.cpp
   src/ao.cpp
+  src/emitter.cpp
 )
 
 add_definitions(${NANOGUI_EXTRA_DEFS})

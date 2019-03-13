@@ -41,15 +41,28 @@ public:
 		// This function call can be done by bsdf sampling routines.
 		// Hence the ray was already traced for us - i.e a visibility test was already performed.
 		// Hence just check if the associated normal in emitter query record and incoming direction are not backfacing
+		if (lRec.wi.dot(lRec.n) < 0) { //EL rayo no pasa por la hemiesfera del triangulo.
+			return 0.0f;
+		} else
+		{
+			return m_radiance;
+		}
 
-		return 0.0f;
 	}
 
 	virtual Color3f sample(EmitterQueryRecord & lRec, const Point2f & sample, float optional_u) const {
 		if (!m_mesh)
 			throw NoriException("There is no shape attached to this Area light!");
-
-		return 0.0f;
+		Point3f p;
+		Normal3f n;
+		m_mesh->samplePosition(sample, p, n);
+		lRec.pdf = m_mesh->pdf(p);
+		lRec.n = n;
+		lRec.p = p;
+		Vector3f refToP = lRec.p - lRec.ref;
+		lRec.dist = refToP.norm();
+		lRec.wi = (lRec.ref - lRec.p).normalized();
+		return 0.0f; //TODO  Ni idea de que se supone que tiene que devolver esto.
 	}
 
 	// Returns probability with respect to solid angle given by all the information inside the emitterqueryrecord.
@@ -59,7 +72,10 @@ public:
 		if (!m_mesh)
 			throw NoriException("There is no shape attached to this Area light!");
 
-		return 1.0;
+		//Area to solid-angle
+		float solidAnglePdf = lRec.pdf  * (lRec.dist / lRec.n.dot(lRec.wi));
+
+		return lRec.pdf;
 	}
 
 

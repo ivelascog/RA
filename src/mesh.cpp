@@ -38,6 +38,8 @@ void Mesh::activate() {
         m_bsdf = static_cast<BSDF *>(
             NoriObjectFactory::createInstance("diffuse", PropertyList()));
     }
+
+
 }
 
 float Mesh::surfaceArea(uint32_t index) const {
@@ -107,13 +109,29 @@ Point3f Mesh::getCentroid(uint32_t index) const {
  */
 void Mesh::samplePosition(const Point2f &sample, Point3f &p, Normal3f &n) const
 {
+	//TODO samplear la malla entera no solo un triangulo.
+	sampleTriangle(sample, p, n, 0);
+}
 
+void Mesh::sampleTriangle(const Point2f &sample, Point3f &p, Normal3f&n, size_t triangle) const
+{
+	uint32_t i0 = m_F(0, triangle), i1 = m_F(1, triangle), i2 = m_F(2, triangle);
+
+	const Point3f p0 = m_V.col(i0), p1 = m_V.col(i1), p2 = m_V.col(i2);
+	const Normal3f n0 = m_N.col(i0), n1 = m_V.col(i1), n2 = m_V.col(i2);
+
+	Point2f s = Warp::squareToTent(sample);
+
+	Point3f barCoords(s(0), s(1), 1 - s(0) - s(1));
+
+	p = (barCoords[0] * p0 + barCoords[1] * p1 + barCoords[2] * p2) / barCoords.sum();
+	n = (barCoords[0] * n0 + barCoords[1] * n1 + barCoords[2] * n2) / barCoords.sum();
 }
 
 /// Return the surface area of the given triangle
 float Mesh::pdf(const Point3f &p) const
 {
-	return 1;
+	return surfaceArea(0);
 }
 
 
