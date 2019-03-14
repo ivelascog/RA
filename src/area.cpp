@@ -73,9 +73,9 @@ public:
 			throw NoriException("There is no shape attached to this Area light!");
 
 		//Area to solid-angle
-		float solidAnglePdf = lRec.pdf  * (lRec.dist / lRec.n.dot(lRec.wi));
+		float solidAnglePdf = lRec.pdf  * (lRec.dist / abs(lRec.n.dot(lRec.wi))); //No estoy muy seguro revisar formulica
 
-		return lRec.pdf;
+		return solidAnglePdf;
 	}
 
 
