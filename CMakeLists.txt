@@ -90,6 +90,7 @@ add_executable(nori
   src/area.cpp
   src/ao.cpp
   src/emitter.cpp
+  src/direct_ems.cpp
 )
 
 add_definitions(${NANOGUI_EXTRA_DEFS})

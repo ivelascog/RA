@@ -124,8 +124,8 @@ void Mesh::sampleTriangle(const Point2f &sample, Point3f &p, Normal3f&n, size_t 
 
 	Point3f barCoords(s(0), s(1), 1 - s(0) - s(1));
 
-	p = (barCoords[0] * p0 + barCoords[1] * p1 + barCoords[2] * p2) / barCoords.sum();
-	n = (barCoords[0] * n0 + barCoords[1] * n1 + barCoords[2] * n2) / barCoords.sum();
+	p = (barCoords[0] * p0 + barCoords[1] * p1 + barCoords[2] * p2);
+	n = (barCoords[0] * n0 + barCoords[1] * n1 + barCoords[2] * n2);
 }
 
 /// Return the surface area of the given triangle

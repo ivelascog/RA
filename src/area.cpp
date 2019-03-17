@@ -45,7 +45,7 @@ public:
 			return 0.0f;
 		} else
 		{
-			return m_radiance;
+			return m_radiance / 40.0f;
 		}
 
 	}
@@ -57,11 +57,11 @@ public:
 		Normal3f n;
 		m_mesh->samplePosition(sample, p, n);
 		lRec.pdf = m_mesh->pdf(p);
-		lRec.n = n;
+		lRec.n = n.normalized();
 		lRec.p = p;
 		Vector3f refToP = lRec.p - lRec.ref;
 		lRec.dist = refToP.norm();
-		lRec.wi = (lRec.ref - lRec.p).normalized();
+		lRec.wi = (lRec.p - lRec.ref).normalized();
 		return 0.0f; //TODO  Ni idea de que se supone que tiene que devolver esto.
 	}
 

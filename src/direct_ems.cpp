@@ -3,6 +3,7 @@
 #include <nori/sampler.h>
 #include "nori/warp.h"
 #include "nori/emitter.h"
+#include "nori/bsdf.h"
 
 NORI_NAMESPACE_BEGIN
 
@@ -37,21 +38,22 @@ public:
 		EmitterQueryRecord lightRecord;
 		lightRecord.ref = xl;
 		light->sample(lightRecord, sample, 0.0f);
+		float pdfDir = light->pdf(lightRecord);
+		
+		//BRDF Term
+		BSDFQueryRecord bsdf_query{its.shFrame.toLocal(-ray.d),its.shFrame.toLocal(lightRecord.wi),ESolidAngle};
 
-		//Sample dir
-		Vector3f dir = Warp::squareToCosineHemisphere(sample);
-		float pdfDir = Warp::squareToCosineHemispherePdf(dir);
+		Color3f brdf = its.mesh->getBSDF()->eval(bsdf_query);
+
 
 		//Visibilty point sampled Light
-		Ray3f shadowRay(xl, lightRecord.wi,0.0f,INFINITY );
+		Ray3f shadowRay(xl, lightRecord.wi, 0.1f, INFINITY);
 		scene->rayIntersect(shadowRay, its);
 		bool V = its.mesh->getEmitter() == light;
-
-		float brdf = 1.0f;
-
+		
 		Color3f Li = V * light->eval(lightRecord);
 
-		return Le + Li * brdf * nx.dot(dir) / (pdfL * pdfDir);
+		return Le + Li * brdf * nx.dot(lightRecord.wi) / (pdfL * pdfDir);
 	}
 
 	/// Return a human-readable description for debugging purposes
