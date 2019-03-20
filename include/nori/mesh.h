@@ -188,6 +188,8 @@ protected:
     BSDF         *m_bsdf = nullptr;      ///< BSDF of the surface
     Emitter    *m_emitter = nullptr;     ///< Associated emitter, if any
     BoundingBox3f m_bbox;                ///< Bounding box of the mesh
+	float m_area;						 ///< Total area of the mesh
+	Sampler* m_triangle_sampler;		 ///< Sampler of the triangles of mesh	
 };
 
 NORI_NAMESPACE_END

@@ -41,7 +41,7 @@ public:
 		// This function call can be done by bsdf sampling routines.
 		// Hence the ray was already traced for us - i.e a visibility test was already performed.
 		// Hence just check if the associated normal in emitter query record and incoming direction are not backfacing
-		if (lRec.wi.dot(lRec.n) < 0) { //EL rayo no pasa por la hemiesfera del triangulo.
+		if (lRec.wi.dot(lRec.n) > 0) { //EL rayo no pasa por la hemiesfera del triangulo.
 			return 0.0f;
 		} else
 		{
@@ -73,7 +73,7 @@ public:
 			throw NoriException("There is no shape attached to this Area light!");
 
 		//Area to solid-angle
-		float solidAnglePdf = lRec.pdf  * (lRec.dist / abs(lRec.n.dot(lRec.wi))); //No estoy muy seguro revisar formulica
+		float solidAnglePdf = lRec.pdf  * (lRec.dist / abs(lRec.n.dot(lRec.wi)));
 
 		return solidAnglePdf;
 	}

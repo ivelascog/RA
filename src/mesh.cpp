@@ -22,6 +22,7 @@
 #include <nori/emitter.h>
 #include <nori/warp.h>
 #include <Eigen/Geometry>
+#include <pcg32.h>
 
 NORI_NAMESPACE_BEGIN
 
@@ -38,6 +39,12 @@ void Mesh::activate() {
         m_bsdf = static_cast<BSDF *>(
             NoriObjectFactory::createInstance("diffuse", PropertyList()));
     }
+	m_area = 0.0f;
+	for (int i = 0; i < this->m_F.cols(); i++)
+	{
+		m_area += surfaceArea(i);
+	}
+	m_triangle_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
 
 
 }
@@ -109,18 +116,13 @@ Point3f Mesh::getCentroid(uint32_t index) const {
  */
 void Mesh::samplePosition(const Point2f &sample, Point3f &p, Normal3f &n) const
 {
-	float rnd = sample.x();
 	float counter = 0.0f;
 	int index;
-	float totalArea = 0.0f;
-	for (int i = 0; i < this->m_F.cols(); i++)
-	{
-		totalArea += surfaceArea(i);
-	}
+	float rnd = m_triangle_sampler->next1D();
 
 	for (int i=0;i< this->m_F.cols();i++)
 	{
-		counter += surfaceArea(i) / totalArea;
+		counter += surfaceArea(i) / m_area;
 		if (counter > rnd)
 		{
 			index = i;
@@ -135,7 +137,7 @@ void Mesh::sampleTriangle(const Point2f &sample, Point3f &p, Normal3f&n, size_t 
 	uint32_t i0 = m_F(0, triangle), i1 = m_F(1, triangle), i2 = m_F(2, triangle);
 
 	const Point3f p0 = m_V.col(i0), p1 = m_V.col(i1), p2 = m_V.col(i2);
-	const Normal3f n0 = m_N.col(i0), n1 = m_V.col(i1), n2 = m_V.col(i2);
+	const Normal3f n0 = m_N.col(i0), n1 = m_N.col(i1), n2 = m_N.col(i2);
 
 	Point2f s = Warp::squareToTent(sample);
 
@@ -148,13 +150,8 @@ void Mesh::sampleTriangle(const Point2f &sample, Point3f &p, Normal3f&n, size_t 
 /// Return the surface area of the given triangle
 float Mesh::pdf(const Point3f &p) const
 {
-	float area = 0.0f;
-	for (int i =0 ; i < this->m_F.cols();i++)
-	{
-		area += surfaceArea(i);
-	}
 
-	return 1.0f / area;
+	return 1.0f / m_area;
 	
 }
 
