@@ -45,7 +45,7 @@ public:
 			return 0.0f;
 		} else
 		{
-			return m_radiance / 40.0f;
+			return m_radiance / std::pow(lRec.dist,2);
 		}
 
 	}

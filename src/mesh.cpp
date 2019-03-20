@@ -109,8 +109,25 @@ Point3f Mesh::getCentroid(uint32_t index) const {
  */
 void Mesh::samplePosition(const Point2f &sample, Point3f &p, Normal3f &n) const
 {
-	//TODO samplear la malla entera no solo un triangulo.
-	sampleTriangle(sample, p, n, 0);
+	float rnd = sample.x();
+	float counter = 0.0f;
+	int index;
+	float totalArea = 0.0f;
+	for (int i = 0; i < this->m_F.cols(); i++)
+	{
+		totalArea += surfaceArea(i);
+	}
+
+	for (int i=0;i< this->m_F.cols();i++)
+	{
+		counter += surfaceArea(i) / totalArea;
+		if (counter > rnd)
+		{
+			index = i;
+			break;
+		}
+	}
+	sampleTriangle(sample, p, n, index);
 }
 
 void Mesh::sampleTriangle(const Point2f &sample, Point3f &p, Normal3f&n, size_t triangle) const
@@ -131,7 +148,14 @@ void Mesh::sampleTriangle(const Point2f &sample, Point3f &p, Normal3f&n, size_t 
 /// Return the surface area of the given triangle
 float Mesh::pdf(const Point3f &p) const
 {
-	return surfaceArea(0);
+	float area = 0.0f;
+	for (int i =0 ; i < this->m_F.cols();i++)
+	{
+		area += surfaceArea(i);
+	}
+
+	return 1.0f / area;
+	
 }
 
 
