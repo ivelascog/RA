@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 
 <scene>
-	<integrator type="direct_ems"/>
+	<integrator type="direct_mats"/>
 
 	<camera type="perspective">
 		<float name="fov" value="27.7856"/>
@@ -45,8 +45,7 @@
 	<mesh type="obj">
 		<string name="filename" value="meshes/sphere1.obj"/>
 
-		<bsdf type="diffuse">
-			<color name="albedo" value="0.161 0.133 0.427"/>
+		<bsdf type="mirror">
 		</bsdf>
 	</mesh>
 

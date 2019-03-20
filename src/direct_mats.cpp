@@ -35,9 +35,16 @@ public:
 		//BRDF sample
 		BSDFQueryRecord bsdf_query_record(its.shFrame.toLocal(-ray.d));
 		its.mesh->getBSDF()->sample(bsdf_query_record, sample);
-
-		Color3f brdf = its.mesh->getBSDF()->eval(bsdf_query_record);
-		float pdfDir = its.mesh->getBSDF()->pdf(bsdf_query_record);
+		Color3f brdf;
+		float pdfDir;
+		if (bsdf_query_record.measure == EDiscrete) {
+			brdf = Color3f(1.0f);
+			pdfDir = 1.0f;
+		}
+		else {
+			brdf = its.mesh->getBSDF()->eval(bsdf_query_record);
+			pdfDir = its.mesh->getBSDF()->pdf(bsdf_query_record);
+		}
 
 		Ray3f brdfRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
 
