@@ -43,6 +43,8 @@ public:
     }
 
     Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const {
+		float fresnelTerm =  fresnel(Frame::cosTheta(bRec.wi), m_extIOR, m_intIOR);
+		
         throw NoriException("Unimplemented!");
     }
 
