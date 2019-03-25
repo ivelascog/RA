@@ -92,6 +92,7 @@ add_executable(nori
   src/emitter.cpp
   src/direct_ems.cpp
   src/direct_mats.cpp
+  src/path.cpp
 )
 
 add_definitions(${NANOGUI_EXTRA_DEFS})
