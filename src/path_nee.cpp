@@ -7,9 +7,9 @@
 
 NORI_NAMESPACE_BEGIN
 
-class PathTracing : public Integrator {
+class PathTracingNee : public Integrator {
 public:
-	PathTracing(const PropertyList &props)
+	PathTracingNee(const PropertyList &props)
 	{
 		p_survival = props.getFloat("Psurvival", 0.8f);
 		m_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
@@ -19,6 +19,7 @@ public:
 	Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
 		Ray3f mRay = ray;
 		Intersection its;
+		Intersection itsLight;
 		Color3f L(0.0f);
 		Color3f W = Color3f(1.0f);
 		while (true) {
@@ -27,7 +28,7 @@ public:
 				L += W * scene->getBackground(mRay);
 				break;
 			}
-			
+
 			Point3f xl = its.p;
 			Normal3f nx = its.shFrame.n;
 			Point2f sample = sampler->next2D();
@@ -41,10 +42,23 @@ public:
 			}
 
 			auto rand = m_sampler->next1D();
-			if (rand <  p_survival)
+			if (rand < p_survival)
 			{
 				break;
 			}
+
+			////sample Light
+			float pdfL;
+			auto light = scene->sampleEmitter(sample.x(), pdfL);
+			EmitterQueryRecord lightRecord;
+			lightRecord.ref = xl;
+			light->sample(lightRecord, sample, 0.0f);
+			float pdfDirLight = light->pdf(lightRecord);
+			Ray3f shadowRay(xl, lightRecord.wi, 0.1f, INFINITY);
+			scene->rayIntersect(shadowRay, itsLight);
+			bool V = itsLight.mesh->getEmitter() == light;
+
+			L += W * ( V * light->eval(lightRecord)/(pdfL * pdfDirLight));
 
 			//BRDF sample
 			BSDFQueryRecord bsdf_query_record(its.shFrame.toLocal(-mRay.d));
@@ -60,9 +74,9 @@ public:
 				pdfDir = its.mesh->getBSDF()->pdf(bsdf_query_record);
 			}
 
-			 mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
-			if (!pdfDir == 0.0f){
-				W *= brdf * Frame::cosTheta(bsdf_query_record.wo) / (pdfDir * p_survival);
+			mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
+			if (!pdfDir == 0.0f) {
+				W *= (brdf * Frame::cosTheta(bsdf_query_record.wo)) / (pdfDir * p_survival);
 			}
 		}
 		return L;
@@ -78,5 +92,5 @@ protected:
 	Sampler* m_sampler;
 };
 
-NORI_REGISTER_CLASS(PathTracing, "pathtracer");
+NORI_REGISTER_CLASS(PathTracingNee, "pathtracer_nee");
 NORI_NAMESPACE_END
