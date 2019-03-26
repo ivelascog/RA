@@ -21,6 +21,7 @@
 #include <nori/object.h>
 #include <nori/frame.h>
 #include <nori/bbox.h>
+#include "dpdf.h"
 
 NORI_NAMESPACE_BEGIN
 
@@ -190,6 +191,7 @@ protected:
     BoundingBox3f m_bbox;                ///< Bounding box of the mesh
 	float m_area;						 ///< Total area of the mesh
 	Sampler* m_triangle_sampler;		 ///< Sampler of the triangles of mesh	
+	DiscretePDF trianglePDF;
 };
 
 NORI_NAMESPACE_END

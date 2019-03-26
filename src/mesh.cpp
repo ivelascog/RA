@@ -23,6 +23,7 @@
 #include <nori/warp.h>
 #include <Eigen/Geometry>
 #include <pcg32.h>
+#include "nori/dpdf.h"
 
 NORI_NAMESPACE_BEGIN
 
@@ -39,11 +40,17 @@ void Mesh::activate() {
         m_bsdf = static_cast<BSDF *>(
             NoriObjectFactory::createInstance("diffuse", PropertyList()));
     }
+	
 	m_area = 0.0f;
 	for (int i = 0; i < this->m_F.cols(); i++)
 	{
-		m_area += surfaceArea(i);
+		float area = surfaceArea(i);
+		trianglePDF.append(area);
+		m_area += area;
 	}
+	trianglePDF.normalize();
+	
+
 	m_triangle_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
 
 
@@ -116,19 +123,9 @@ Point3f Mesh::getCentroid(uint32_t index) const {
  */
 void Mesh::samplePosition(const Point2f &sample, Point3f &p, Normal3f &n) const
 {
-	float counter = 0.0f;
-	int index;
 	float rnd = m_triangle_sampler->next1D();
+	int index = trianglePDF.sample(rnd);
 
-	for (int i=0;i< this->m_F.cols();i++)
-	{
-		counter += surfaceArea(i) / m_area;
-		if (counter > rnd)
-		{
-			index = i;
-			break;
-		}
-	}
 	sampleTriangle(sample, p, n, index);
 }
 
@@ -142,6 +139,10 @@ void Mesh::sampleTriangle(const Point2f &sample, Point3f &p, Normal3f&n, size_t 
 	Point2f s = Warp::squareToTent(sample);
 
 	Point3f barCoords(s(0), s(1), 1 - s(0) - s(1));
+	if (barCoords.sum() > 1)
+	{
+		printf("Liada parda");
+	}
 
 	p = (barCoords[0] * p0 + barCoords[1] * p1 + barCoords[2] * p2);
 	n = (barCoords[0] * n0 + barCoords[1] * n1 + barCoords[2] * n2);

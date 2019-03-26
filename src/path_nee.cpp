@@ -39,6 +39,7 @@ public:
 				lightRecord.ref = xl;
 				emmiter->sample(lightRecord, sample, 0.0f);
 				L += W * emmiter->eval(lightRecord);
+				return L;
 			}
 
 			auto rand = m_sampler->next1D();
@@ -52,11 +53,13 @@ public:
 			auto light = scene->sampleEmitter(sample.x(), pdfL);
 			EmitterQueryRecord lightRecord;
 			lightRecord.ref = xl;
+			lightRecord.emitter = light;
 			light->sample(lightRecord, sample, 0.0f);
 			float pdfDirLight = light->pdf(lightRecord);
 			Ray3f shadowRay(xl, lightRecord.wi, 0.1f, INFINITY);
-			scene->rayIntersect(shadowRay, itsLight);
-			bool V = itsLight.mesh->getEmitter() == light;
+			bool V = scene->rayIntersect(shadowRay, itsLight);
+
+			V = V && itsLight.mesh->getEmitter() == light;
 
 			L += W * ( V * light->eval(lightRecord)/(pdfL * pdfDirLight));
 
@@ -76,7 +79,7 @@ public:
 
 			mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
 			if (!pdfDir == 0.0f) {
-				W *= (brdf * Frame::cosTheta(bsdf_query_record.wo)) / (pdfDir * p_survival);
+				W *= (brdf * Frame::cosTheta(bsdf_query_record.wi)) / (pdfDir * p_survival);
 			}
 		}
 		return L;

@@ -62,7 +62,7 @@ public:
 
 			 mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
 			if (!pdfDir == 0.0f){
-				W *= brdf * Frame::cosTheta(bsdf_query_record.wo) / (pdfDir * p_survival);
+				W *= brdf * Frame::cosTheta(bsdf_query_record.wi) / (pdfDir * p_survival);
 			}
 		}
 		return L;

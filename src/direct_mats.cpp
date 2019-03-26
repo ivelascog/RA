@@ -77,7 +77,7 @@ public:
 			return Le;
 		}
 		else {
-			return Le + Li * brdf * Frame::cosTheta(bsdf_query_record.wo) / pdfDir;
+			return Le + Li * brdf * Frame::cosTheta(bsdf_query_record.wi) / pdfDir;
 		}
 	}
 
