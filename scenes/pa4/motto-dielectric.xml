@@ -1,6 +1,6 @@
 
 <scene>
-    <integrator type="whitted"/>
+    <integrator type="pathtracer"/>
 
     <sampler type="independent">
         <!-- You might want to reduce this number during development -->

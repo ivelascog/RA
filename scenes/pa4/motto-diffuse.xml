@@ -1,6 +1,6 @@
 
 <scene>
-    <integrator type="whitted"/>
+    <integrator type="direct_mats"/>
 
     <sampler type="independent">
         <!-- You might want to reduce this number during development -->

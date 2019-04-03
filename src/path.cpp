@@ -15,6 +15,8 @@ public:
 		m_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
 	}
 
+	
+
 	/// Compute the radiance value for a given ray. Just return green here
 	Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
 		Ray3f mRay = ray;
@@ -62,7 +64,7 @@ public:
 
 			 mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
 			if (!pdfDir == 0.0f){
-				W *= brdf * Frame::cosTheta(bsdf_query_record.wi) / (pdfDir * p_survival);
+				W *= brdf * abs(Frame::cosTheta(bsdf_query_record.wi)) /  (pdfDir * p_survival);
 			}
 		}
 		return L;

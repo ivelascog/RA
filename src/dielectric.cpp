@@ -26,11 +26,17 @@ class Dielectric : public BSDF {
 public:
     Dielectric(const PropertyList &propList) {
         /* Interior IOR (default: BK7 borosilicate optical glass) */
-        m_intIOR = propList.getFloat("intIOR", 1.5046f);
+        m_intIOR = propList.getFloat("intIOR", 1.54f);
 
         /* Exterior IOR (default: air) */
         m_extIOR = propList.getFloat("extIOR", 1.000277f);
     }
+
+	inline Vector3f refract(const Vector3f &wi, float cosThetaT,float eta) const {
+		float scale = -(cosThetaT < 0 ? 1.0f/eta : eta);
+		
+		return Vector3f(scale * wi.x(), scale *wi.y(), cosThetaT);
+	}
 
     Color3f eval(const BSDFQueryRecord &) const {
         /* Discrete BRDFs always evaluate to zero in Nori */
@@ -43,9 +49,35 @@ public:
     }
 
     Color3f sample(BSDFQueryRecord &bRec, const Point2f &sample) const {
-		float fresnelTerm =  fresnel(Frame::cosTheta(bRec.wi), m_extIOR, m_intIOR);
-		
-        throw NoriException("Unimplemented!");
+		bRec.measure = EDiscrete;
+		float cosThetaI = Frame::cosTheta(bRec.wi);
+		float fresnelTerm =  fresnel(cosThetaI, m_extIOR, m_intIOR);
+
+		if ( sample.x() <= fresnelTerm)
+		{
+			bRec.wo = Vector3f(
+				-bRec.wi.x(),
+				-bRec.wi.y(),
+				bRec.wi.z()
+			);
+		} else
+		{
+			float eta = m_intIOR / m_extIOR;
+			float scale = (cosThetaI > 0) ? 1 / eta : eta,
+				cosThetaTSqr = 1 - (1 - cosThetaI * cosThetaI) * (scale*scale);
+			float cosThetaT;
+			/* Check for total internal reflection */
+			if (cosThetaTSqr <= 0.0f) {
+				cosThetaT = 0.0f;
+			}
+
+			/* Find the absolute cosines of the incident/transmitted rays */
+			cosThetaT = std::sqrt(cosThetaTSqr);
+			cosThetaT = (cosThetaI > 0) ? -cosThetaT : cosThetaT;
+			bRec.wo = refract(bRec.wi, cosThetaT,eta);
+		}
+
+		return Color3f(0);
     }
 
     std::string toString() const {
