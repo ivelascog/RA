@@ -1,0 +1,50 @@
+\documentclass[10pt,oneside,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+\usepackage{enumitem}
+\usepackage[spanish]{babel}
+\usepackage[export]{adjustbox}
+\usepackage{graphicx}
+\graphicspath{ {img/} }
+\usepackage{listings}
+\usepackage{subfig}
+\usepackage{cite}
+
+\addtolength{\oddsidemargin}{-.300in}
+\addtolength{\evensidemargin}{-.300in}
+\addtolength{\textwidth}{0.600in}
+\addtolength{\topmargin}{-.300in}
+\addtolength{\textheight}{0.600in} %1.75
+
+\begin{document}
+\begin{titlepage}
+
+\title{\Huge Rendering Avanzado  \\[0.7in] \LARGE Iluminación directa\\[3.6in]}
+\date{}
+\author{Álvaro Muñoz Fernández\\
+Iván Velasco González}
+\maketitle
+\thispagestyle{empty}
+\end{titlepage}
+
+\section{Emmiter Sampling}
+En esta parte de la practica se debia de implementar en \textit{nori} todo lo necesario para poder realizar un algoritmo de iluminación directa que samplee directamente las fuentes de luz.
+\subsection{Mesh Area Light}
+\subsubsection{Triangle Sampling}
+El primer paso para poder realizar esta tarea consiste en poder samplear de forma correcta una malla de triangulos que modelara nuestra fuente de ilumnación.\\
+
+En primer lugar, se implemento un metodo \textit{sampleTriangle}, el cual obtiene la posición y la normal de un punto interno al triangulo a partir de un sample 2D que se utiliza, por medio de la conversión de distribuciones, como coordenadas baricentricas del triangulo. Sin embargo, esto nos proporciona unicamente dos coordenadas baricentricas, pero a partir de $ u + v + w = 1$, la ultima coordenada se obtiene como $ w = 1 - u - v$. Una vez obtenidas todas las coordenadas baricentricas se interpola la posición del punto a partir de la posición de los vertices que componenen el triangulo, y se realiza un proceso similar para calcular su normal. Es importante destacar que, en caso de que las mallas que conforman las luces no tengan normales asociadas, el algoritmo dara un error al intentar acceder a estas normales.\\
+
+Una vez podemos samplear un triangulo de forma correcta es necesario elegir que triangulo de toda la malla se ha de escoger para ser sampleado, teniendo en cuenta que la probabilidad de que un triangulo sea sampleado debe ser proporcional al area que tenga este respecto a la malla completa. Para conseguir esta PDF se ha utilizado la clase \textit{DiscretePDF} implementada por \textit{nori}, la cual se ha inicializado añadiendole el area de todos los triangulos en su orden de aparición en la malla y despues se ha normalizado. Una vez tenemos construida esta PDF para samplear un triangulo simplemente se le pide un sample a esta distribución a partir de un nuevo valor aleatorio, distinto que los usados para samplear el triangulo en si, para evitar correlar\textit{ samples}.
+\subsubsection{Area Emitter}
+En esta parte de la practica se debia rellenar todos los metodos necesarios para poder utilizar en un integrador una luz de area, aprovechando los metodos de sampleo implementados en el apartado anterior. Estos metodos son \textit{sample} \textit{eval} y \textit{pdf}.\\
+
+En primer lugar, se debe tener en cuenta que todos los metodos de esta clase reciben como entrada un \textit{EmitterQueryRecord} el cual es el encargado de almacenar toda la información necesaria para que los metodos de la clase funcionen correctamente.\\
+
+Seguidamente se detallara la implemtación del metodo \textit{sample}. Este metodo es el encargado de, a partir del punto a iluminar y un sample, samplear un punto de la fuente de luz y rellenar todo el \textit{EmitterQueryRecord} de forma consecuente teniendo en cuenta el punto a iluminar y el punto de la fuente de luz sampleado. En primer lugar, se rellena el registro con el punto sampleado y su normal los cuales son obtenidos por medio de una llamada al metodo de sampleo de la malla implementado en el apartado anterior, la pdf del punto sampleado, que se obtiene a partir de la malla. Ademas, tambien se rellena la distancia entre el punto a iluminar y el punto sampleado en la fuente de luz , y el vector incidente desde el punto a iluminar a la fuente de luz.\\
+
+Respecto al metodo \textit{eval}, este es el encargado de a partir de un \textit{EmitterQueryRecord} rellenado de forma correcta, por la función de sample o por otro metodo, delvolver la luz que recibe el punto a iluminar desde el punto de la luz elegido. Teniendo en cuenta que no es necesario realizar ningun \textit{test} de oclusión en esta evaluación, ya que de esto se encargará el integrador, se comprueba si el rayo incidente a la luz procede de la cara trasera del triangulo , ya que , en este caso la iluminación devuelta deberia ser 0. Esto se comprueba por medio del producto escalar entre el rayo incidente y la normal, siendo que si este es mayor que 0 el rayo procede de la cara trasera del triangulo. En caso de que esto no sea asi y el rayo proceda de la cara delantera del triangulo, la iluminación que recibe el punto a iluminar del punto sampleado sera la radiancia atenuada por la distancia es decir $\frac{Radiance}{Distance^2}$
+
+
+\end{document}
