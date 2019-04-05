@@ -27,8 +27,8 @@ public:
 		{
 			EmitterQueryRecord lightRecord;
 			auto emmiter = its.mesh->getEmitter();
-			lightRecord.ref = xl;
-			emmiter->sample(lightRecord, sample, 0.0f);
+			lightRecord.wi = ray.d;
+			lightRecord.dist = its.t;
 			Le = emmiter->eval(lightRecord);
 		}
 

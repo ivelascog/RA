@@ -27,8 +27,8 @@ public:
 		{
 			EmitterQueryRecord lightRecord;
 			auto emmiter = its.mesh->getEmitter();
-			lightRecord.ref = xl;
-			emmiter->sample(lightRecord, sample, 0.0f);
+			lightRecord.wi = ray.d;
+			lightRecord.dist = its.t;
 			Le = emmiter->eval(lightRecord);
 		}
 
@@ -53,7 +53,7 @@ public:
 		
 		Color3f Li = V * light->eval(lightRecord);
 
-		return Le + Li * brdf * nx.dot(-ray.d) / (pdfL * pdfDir);
+		return Le + (Li * brdf * nx.dot(-ray.d)) / (pdfL * pdfDir);
 	}
 
 	/// Return a human-readable description for debugging purposes

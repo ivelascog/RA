@@ -34,7 +34,7 @@ public:
 
 	inline Vector3f refract(const Vector3f &wi, float cosThetaT,float eta) const {
 		float scale = -(cosThetaT < 0 ? 1.0f/eta : eta);
-		
+	
 		return Vector3f(scale * wi.x(), scale *wi.y(), cosThetaT);
 	}
 
