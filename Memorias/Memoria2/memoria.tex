@@ -36,15 +36,15 @@ El primer paso para poder realizar esta tarea consiste en poder muestrear de for
 
 En primer lugar, se implementó un método \textit{sampleTriangle()} que obtiene la posición y la normal de un punto interno al triángulo a partir de un sample 2D que se emplea, por medio de la conversión de distribuciones, como coordenadas baricéntricas del triángulo. Sin embargo, esto nos proporciona únicamente dos coordenadas baricéntricas, pero a partir de $ u + v + w = 1$, la última coordenada se obtiene como $ w = 1 - u - v$. Una vez obtenidas todas las coordenadas baricéntricas se interpola la posición del punto a partir de la posición de los vértices que componen el triangulo, y se realiza un proceso similar para calcular su normal. Es importante destacar que, en caso de que las mallas que conforman las luces no tengan normales asociadas, el algoritmo dará un error al intentar acceder a estas normales.\\
 
-Una vez podemos muestrear un triángulo de forma correcta es necesario elegir que triángulo de toda la malla se ha de escoger para ser muestreado, teniendo en cuenta que la probabilidad de que un triángulo sea muestreado debe ser proporcional al área que tenga este respecto a la malla completa. Para conseguir esta PDF se ha utilizado la clase \textit{DiscretePDF} implementada por \textit{nori}, la cual se ha inicializado añadiéndole el área de todos los triángulos en su orden de aparición en la malla y después se ha normalizado. Una vez tenemos construida esta PDF para muestrear un triángulo simplemente se le pide una muestra a esta distribución a partir de un nuevo valor aleatorio, distinto que los usados para muestrear el triángulo en sí, para evitar correlar\textit{samples}.\\
+Una vez podemos muestrear un triángulo de forma correcta, es necesario elegir que triángulo de toda la malla se ha de escoger para ser muestreado, teniendo en cuenta que la probabilidad de que un triángulo sea muestreado debe ser proporcional al área que tenga este respecto a la malla completa. Para conseguir esta PDF se ha utilizado la clase \textit{DiscretePDF} implementada por \textit{nori}, la cual se ha inicializado añadiéndole el área de todos los triángulos en su orden de aparición en la malla, y después se ha normalizado. Una vez tenemos construida esta PDF, para muestrear un triángulo simplemente se le pide una muestra a esta distribución a partir de un nuevo valor aleatorio, distinto que los usados para muestrear el triángulo en sí, para evitar correlar \textit{samples}.\\
 
-Por último, para calcular la pdf del punto concreto respecto a todo la malla simplemente se devuelve la inversa del área de la malla, ya que el método de muestreo es uniforme.
+Por último, para calcular la pdf del punto concreto respecto a todo la malla, simplemente se devuelve la inversa del área de la malla, ya que el método de muestreo es uniforme.
 \subsubsection{Area Emitter}
 En esta parte de la practica se debían rellenar todos los métodos necesarios para poder utilizar una luz de área en un integrador. Para ello, se han aprovechado los métodos de muestreo implementados en el apartado anterior. Los  métodos a implementar para poder utilizar estas luces de área en un integrador son: \textit{sample} \textit{eval} y \textit{pdf}.\\
 
 En primer lugar, se debe tener en cuenta que todos los métodos de esta clase reciben como entrada un \textit{EmitterQueryRecord} el cual es el encargado de almacenar toda la información necesaria para que los métodos de la clase funcionen correctamente.\\
 
-Seguidamente se detallará la implementación del método \textit{sample}. Este método es el encargado de, a partir del punto a iluminar y una muestra, muestrear un punto de la fuente de luz y rellenar todo el \textit{EmitterQueryRecord} de forma consecuente teniendo en cuenta el punto a iluminar y el punto de la fuente de luz sampleado. En primer lugar, se rellena el registro con: el punto muestreado y su normal, los cuales son obtenidos por medio de una llamada al método de muestreo de la malla implementado en el apartado anterior y la \textit{PDF} del punto sampleado. Además, también se rellena la distancia entre el punto a iluminar y el punto sampleado en la fuente de luz, y el vector incidente desde el punto a iluminar a la fuente de luz.\\
+Seguidamente se detallará la implementación del método \textit{sample}. Este método es el encargado de, a partir del punto a iluminar y una muestra, muestrear un punto de la fuente de luz y rellenar todo el \textit{EmitterQueryRecord} de forma consecuente, teniendo en cuenta el punto a iluminar y el punto de la fuente de luz sampleado. En primer lugar, se rellena el registro con: el punto muestreado y su normal, los cuales son obtenidos por medio de una llamada al método de muestreo de la malla implementado en el apartado anterior y la \textit{PDF} del punto sampleado. Además, también se rellena la distancia entre el punto a iluminar y el punto sampleado en la fuente de luz, y el vector incidente desde el punto a iluminar a la fuente de luz.\\
 
 Respecto al método \textit{eval}, este es el encargado de, a partir de un \textit{EmitterQueryRecord} rellenado de forma correcta, por la función de muestreo o por otro método, devolver la luz que recibe el punto a iluminar desde el punto de la luz elegido. Teniendo en cuenta que no es necesario realizar ningún \textit{test} de oclusión en esta evaluación, ya que de esto se encargará el integrador, se comprueba si el rayo incidente a la luz procede de la cara trasera del triángulo, ya que en este caso la iluminación devuelta debería ser 0. Esto se comprueba por medio del producto escalar entre el rayo incidente y la normal, siendo que si este es mayor que 0 el rayo procede de la cara trasera del triángulo. En caso de que esto no sea así y el rayo proceda de la cara delantera del triángulo, la iluminación que recibe el punto a iluminar del punto sampleado será la radiancia atenuada por la distancia, es decir, $Radiance_p = \frac{Radiance}{Distance^2}$\\
 
@@ -55,7 +55,7 @@ En esta parte de la práctica se debía implementar un método de iluminación d
 $$L_o = Le(x,\omega_o) + \int_\Omega Li(x,\omega_i) * brdf(x,\omega_o,\omega_i)  * \cos\theta_i d\omega_i$$
 Teniendo en cuenta que las direcciones de los rayos incidentes ($\omega_i$) van a ser calculadas por medio de un muestreo de las fuentes de luz de la escena.\\
 
-Para realizar esto, en un primer lugar se trazará el rayo de cámara y se comprobará si colisiona o no con la geometría de la escena. En caso de que colisione, se obtienen el punto de la colisión y su normal asociada. Seguidamente comprobamos si el punto a iluminar pertenece a una fuente de luz. Si esto es así se construye un \textit{EmitterQueryRecord}, donde la dirección de incidencia a la luz es igual a la dirección del rayo de cámara y su distancia viene determinada por la distancia de la cámara a la fuente de luz. Aunque de esta parte de la implementación no estamos muy seguros, ya que no se tiene en cuenta la distancia a la cámara en ningún otro elemento de la escena, pensamos que esto debe ser así para que las luces pierdan intensidad en función de su distancia a la cámara.\\
+Para realizar esto, en un primer lugar se trazará el rayo de cámara y se comprobará si colisiona o no con la geometría de la escena. En caso de que colisione, se obtienen el punto de la colisión y su normal asociada. Seguidamente comprobamos si el punto a iluminar pertenece a una fuente de luz. Si esto es así se construye un \textit{EmitterQueryRecord}, donde la dirección de incidencia a la luz es igual a la dirección del rayo de cámara y su distancia se ha fijado proxima a 0, y no 0, para evitar errores de calculo.\\
 
 En el caso de que el rayo de la cámara no interseque con una fuente de luz, pero sí con algún elemento de la escena, se muestreará un punto de iluminación de la escena. Para ello se ha usado la función \textit{sampleEmitter} implementada por \textit{nori}, quel nos devuelve una fuente de luz de la escena y su \textit{PDF} asociada. Seguidamente se realiza el muestreo de un punto concreto de esta fuente de luz obteniendo un \textit{EmitterQueryRecord} que encapsula toda la información del muestreo.\\
 
@@ -112,7 +112,7 @@ Ademas hay que tener en cuenta que se han realizado varias comprobaciones para c
  \begin{figure}[h]
 \centering
 \includegraphics[width=.6\linewidth]{images/cbox_direct_ems_comlex_512.png}
-\caption{Puntos que causan PDFs incorrectas}
+\caption{Imagen generada con iluminacion directa muestreando las fuentes de luz}
 \label{fig:disp}
 \end{figure}
 
@@ -123,7 +123,6 @@ Ademas hay que tener en cuenta que se han realizado varias comprobaciones para c
 \label{fig:disp}
 \end{figure}
 
-Como puede 
  
  \subsection{Discussion}
  En esta sección se van a discutir las diferencias encontradas respescto a los dos métodos de iluminación directa implementados, por un lado respecto al sampleo de las fuentes de luz de la escena y por el otro respecto al muestreo de la \textit{BRDF}.\\
@@ -133,7 +132,7 @@ Como puede
 Sin embargo, cuando añadimos materiales más complejos como espejos o dieléctricos, nos encontramos con que muestreando las fuentes de luz no conseguimos capturar efectos como los reflejos o la transmisión. Debido principalmente a que, como estos materiales son de tipo discreto en \textit{nori}, siempre devolverá un valor de 0 tanto su \textit{BRDF} como su \textit{PDF}.\\
  
  \subsection{Interesting Image}
- En esta sección se ha diseñado una imagen que, junto con las otras, muestra las limitaciones de la iluminación directa. Además también muestra algunos efectos en el dieléctrico y en los espejos que no se han podido visualizar previamente.\\
+ En esta sección se ha diseñado una imagen que, junto con las otras, muestra las limitaciones de la iluminación directa. Además también muestra algunos efectos en el dieléctrico y en los espejos que no se han podido visualizar previamente. Por lo tanto, se ha usado el metodo basado en la BRDF para renderizar\\
  
  \begin{figure}[h]
 \centering
