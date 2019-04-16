@@ -22,24 +22,27 @@ public:
 		Intersection itsLight;
 		Color3f L(0.0f);
 		Color3f W = Color3f(1.0f);
+		bool difusseLight = true;
 		while (true) {
 
 			if (!scene->rayIntersect(mRay, its)) {
-				L += W * scene->getBackground(mRay);
+				//L += W * scene->getBackground(mRay);
 				break;
 			}
 
 			Point3f xl = its.p;
 			Normal3f nx = its.shFrame.n;
 			Point2f sample = sampler->next2D();
-			if (its.mesh->isEmitter())
+			if (its.mesh->isEmitter() && difusseLight)
 			{
 				EmitterQueryRecord lightRecord;
 				auto emmiter = its.mesh->getEmitter();
-				lightRecord.ref = xl;
-				emmiter->sample(lightRecord, sample, 0.0f);
+				lightRecord.ref = mRay.o;
+				lightRecord.p = xl;
+				lightRecord.n = nx;
+				lightRecord.dist = its.t;
+				lightRecord.wi = (lightRecord.p - lightRecord.ref).normalized();
 				L += W * emmiter->eval(lightRecord);
-				return L;
 			}
 
 			auto rand = m_sampler->next1D();
@@ -48,20 +51,25 @@ public:
 				break;
 			}
 
-			////sample Light
+			//Light Sample
 			float pdfL;
 			auto light = scene->sampleEmitter(sample.x(), pdfL);
 			EmitterQueryRecord lightRecord;
 			lightRecord.ref = xl;
-			lightRecord.emitter = light;
 			light->sample(lightRecord, sample, 0.0f);
 			float pdfDirLight = light->pdf(lightRecord);
-			Ray3f shadowRay(xl, lightRecord.wi, 0.1f, INFINITY);
-			bool V = scene->rayIntersect(shadowRay, itsLight);
+			Intersection itsShadow;
+			Ray3f shadowRay(xl, lightRecord.wi);
+			bool V = scene->rayIntersect(shadowRay, itsShadow);
+			V = V && itsShadow.mesh->isEmitter() && itsShadow.mesh->getEmitter() == light;
 
-			V = V && itsLight.mesh->getEmitter() == light;
+			//Eval BRDF
 
-			L += W * ( V * light->eval(lightRecord)/(pdfL * pdfDirLight));
+			BSDFQueryRecord bsdf_query{ its.shFrame.toLocal(-ray.d),its.shFrame.toLocal(lightRecord.wi),ESolidAngle };
+
+			Color3f brdfNee = its.mesh->getBSDF()->eval(bsdf_query);
+
+			L += light->eval(lightRecord) * brdfNee * V * W / pdfDirLight;
 
 			//BRDF sample
 			BSDFQueryRecord bsdf_query_record(its.shFrame.toLocal(-mRay.d));
@@ -71,15 +79,17 @@ public:
 			if (bsdf_query_record.measure == EDiscrete) {
 				brdf = Color3f(1.0f);
 				pdfDir = 1.0f;
+				difusseLight = true;
 			}
 			else {
 				brdf = its.mesh->getBSDF()->eval(bsdf_query_record);
 				pdfDir = its.mesh->getBSDF()->pdf(bsdf_query_record);
+				difusseLight = false;
 			}
 
 			mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
 			if (!pdfDir == 0.0f) {
-				W *= (brdf * Frame::cosTheta(bsdf_query_record.wi)) / (pdfDir * p_survival);
+				W *= brdf * abs(Frame::cosTheta(bsdf_query_record.wi)) / (pdfDir * p_survival);
 			}
 		}
 		return L;
