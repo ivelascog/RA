@@ -11,8 +11,9 @@ class PathTracingNee : public Integrator {
 public:
 	PathTracingNee(const PropertyList &props)
 	{
-		p_survival = props.getFloat("Psurvival", 0.8f);
-		m_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
+		p_survival = props.getFloat("Psurvival", 0.5f);
+		m_roulette_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
+		m_light_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
 	}
 
 	/// Compute the radiance value for a given ray. Just return green here
@@ -26,7 +27,7 @@ public:
 		while (true) {
 
 			if (!scene->rayIntersect(mRay, its)) {
-				//L += W * scene->getBackground(mRay);
+				L += W * scene->getBackground(mRay);
 				break;
 			}
 
@@ -45,7 +46,7 @@ public:
 				L += W * emmiter->eval(lightRecord);
 			}
 
-			auto rand = m_sampler->next1D();
+			auto rand = m_roulette_sampler->next1D();
 			if (rand < p_survival)
 			{
 				break;
@@ -53,7 +54,7 @@ public:
 
 			//Light Sample
 			float pdfL;
-			auto light = scene->sampleEmitter(sample.x(), pdfL);
+			auto light = scene->sampleEmitter(m_light_sampler->next1D(), pdfL);
 			EmitterQueryRecord lightRecord;
 			lightRecord.ref = xl;
 			light->sample(lightRecord, sample, 0.0f);
@@ -69,7 +70,7 @@ public:
 
 			Color3f brdfNee = its.mesh->getBSDF()->eval(bsdf_query);
 
-			L += light->eval(lightRecord) * brdfNee * V * W / pdfDirLight;
+			L += (light->eval(lightRecord) * brdfNee * V * W) / (pdfDirLight * pdfL);
 
 			//BRDF sample
 			BSDFQueryRecord bsdf_query_record(its.shFrame.toLocal(-mRay.d));
@@ -102,7 +103,8 @@ public:
 
 protected:
 	float p_survival;
-	Sampler* m_sampler;
+	Sampler* m_roulette_sampler;
+	Sampler* m_light_sampler;
 };
 
 NORI_REGISTER_CLASS(PathTracingNee, "pathtracer_nee");

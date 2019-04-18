@@ -11,7 +11,7 @@ class PathTracing : public Integrator {
 public:
 	PathTracing(const PropertyList &props)
 	{
-		p_survival = props.getFloat("Psurvival", 0.8f);
+		p_survival = props.getFloat("Psurvival", 0.5f);
 		m_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
 	}
 
@@ -46,7 +46,7 @@ public:
 			}
 
 			auto rand = m_sampler->next1D();
-			if (rand <  p_survival)
+			if (rand < p_survival)
 			{
 				break;
 			}

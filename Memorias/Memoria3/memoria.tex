@@ -1,0 +1,84 @@
+\documentclass[10pt,oneside,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+\usepackage{enumitem}
+\usepackage[spanish]{babel}
+\usepackage[export]{adjustbox}
+\usepackage{graphicx}
+\graphicspath{ {img/} }
+\usepackage{listings}
+\usepackage{subfig}
+\usepackage{cite}
+
+\addtolength{\oddsidemargin}{-.300in}
+\addtolength{\evensidemargin}{-.300in}
+\addtolength{\textwidth}{0.600in}
+\addtolength{\topmargin}{-.300in}
+\addtolength{\textheight}{0.600in} %1.75
+
+\begin{document}
+\begin{titlepage}
+
+\title{\Huge Rendering Avanzado  \\[0.7in] \LARGE \textit{Path Tracing}\\[3.6in]}
+\date{}
+\author{Álvaro Muñoz Fernández\\
+Iván Velasco González}
+\maketitle
+\thispagestyle{empty}
+\end{titlepage}
+
+\section{Path Tracing}
+En esta parte de la práctica se debían implementar varios algoritmos de \textit{ Path Tracing} que se veran mas adelante es subsiguientes secciones.
+\subsection{Naive Path Tracing}
+En esta sección se pedia implentar un metodo de \textit{Path Tracing} basico, teniendo en cuenta unicamente la BRDF de los materiales. Por lo tanto, este es muy similar al realizado en la practica anterior (\textit{direct\_mats}) , con la salvedad de que, no se limitara la pronfundidad del camino a un unico rayo, sino que podran tener mas profundidad, consiguiendo mas rebotes por la escena, y por tanto, ilumilación global.\\
+
+Debido a las similitudes con el \textit{direct\_mats}, se decidio utilizar este como base. En primer lugar, se añadieron una serie de variables como: \textit{L}, la cual alamacena la iluminación total calculada para un punto en concreto, la cual se inicializa a 0; \textit{W} la cual almacena todos los multiplicadores, como la brdf, pdfs, etc.. que se iran acumulando tras los sucesivos rebotes, la cual se inicializa a 1, y por ultimo, una varible que representa el rayo que se esta tratando, \textit{mRay}, la cual se inicializa con el primer rayo trazado desde la camara.\\
+
+Seguidamente, se ha implementado un blucle infinito que se encargara de computar la iluminación en si. En primer lugar, se comprueba si el rayo que se esta trazando en ese momento interseca con la geometria de la escena, si esto no es asi se suma a la iluminación total del punto, la iluminación proporcionada por el ambiente multiplicada por todas las interacciónes de la luz (\textit{W}) y se devuelve la iluminacion total calculada. En el caso de que el rayo si interseque con geometria de la escena, se comprueba si ha intersecado con una fuente de luz, si esto es asi se suma a la iluminación total en el punto la iluminación de esa fuente de luz multipizada por \textit{W}. Seguidamente, se comprueba si se debe de seguir trazando rayos por el metodo de ruleta rusa, se comprueba si un numero aleatorio, distinto que los utilziados para samplear, es menor que la probabilidad de que continue el rayo, si esto es asi, se sale del bucle de iluminación y se devuelve la iluminación calcualda ahsta el momento. En caso de que se deba de seguir trazando rayos, se samplea la BRDF del  material con el que se ha intersecado, y se calcula el nuevo rayo a utilizar (\textit{mRay}). Ademas, se actualiza el valor de \textit{W} con las caracteristicas de este nuevo rebote de la siguiente forma:
+$$W *= \frac{brdf * cos\theta}{pdf_{dir} * pdf_{surv}}$$
+
+Donde $\theta$ es el angulo entre la normal del punto a tratar y el angulo de salida del rayo, y $pdf_{surv}$ es la probabilidad de supervivincia de un rebote, este ultimo termino es necesario añadirlo debido a la utilizacion del metodo de ruleta rusa para terminar con los rebotes de la luz.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.6\linewidth]{images/cbox_path_512.png}
+\caption{Imagen generada utilizando \textit{Path Tracing} simple}
+\label{fig:disp}
+\end{figure}
+
+Como puede verse en la imagen, se han conseguido varios efectos de iluminación global, como los reflejos en la esfera de espejo o la caustica en la esfera que representa un cristal, ademas de un poco de \textit{ color bleding} en el techo proveniente de las paredes. Sin embargo, se aprecia una gran cantidad de ruido tanto en las paredes, como en los reflejos. Ademas, el dielectrico aunque se puede observar que la luz puede pasar a traves de el, se ve practicamente negro debido a la dificultad de encontrar un camino que lo atraviese y llegue a una fuente de luz, mientras que la caustica si que tiene una apariencia aceptable.\\
+
+Por otro lado, la convergencia de la imagen no es muy buena debido a que solamente los caminos que intersequen con una fuente de luz contribuiran a la iluminación final. Por lo tanto, una gran cantidad de muestras se desperdician al no encontrar la luz.
+
+\subsection{Path Tracing with Next-Event Estimation}
+En esta parte de la práctica se va a implementar un \textit{Path tracer} algo mas sofisticado que resuelva algunos de los problemas de la versión anterior. En concreto, trata de resolver el problema de convergencia que proocan los caminos que no intersecan con ninguna luz, y que por tanto, no aportan nada a la escena. Para resolver esto, se va a calcular en cada rebote, la iluminación directa que recibe ese punto desde una fuente de luz, con esto se consigue que cada rebote tenga, en la mayoria de los casos, algo de aporte de luz garantizando haciendo que todos los rebotes contribuyan a la ilumiinación , lo que mejora la convergencia. Ademas, se siguen trazando los rayos impuestos por la BRDF para conservar la iluminación global.\\
+
+Para realizar esta tarea se ha partido del codigo implementado en la sección anterior, pero se ha añadido un nuevo bloque de codigo que, para cada rebote \textit{samplea} una fuente de luz aleatoria y calcula su aportación a la luz del punto a tratar como:
+$$ L += \frac{Li * brdf_{nee} * V * W}{pdf_{dir} * pdf_{light}}$$
+
+Donde: $Li$ es la iluminación directa que lleg al punto desde la fuente de luz sampleada; $brdf_{nee}$ es el termino brdf teniendo en cuenta la dirección del rayo de entrada, y al direccion del rayo de salida, el que va hacia la luz; $V$ es el termino de visibildad, ya que, como hemos sampleado al luz esta podria estar ocluida y , por ultimo $pdf_{light}$ y $pdf_{dir}$ son las pdf de la luz sampleada y del punto en concreto sampleado respectivamente. \\
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.6\linewidth]{images/cbox_pathNee_512.png}
+\caption{Imagen generada utilizando \textit{Path Tracing} con \textit{Nee}}
+\label{fig:disp}
+\end{figure}
+
+Como puede observarse en la imagen, se ha conseguido el resultaode sperando obteniendo muchisima mejor convergencia a igual numero de muestras para esta escena, donde ha meorado tanto la iluminación de las paredes como los reflejos y sobte todo el interior del dielectrico que ya no es tan negro. Sin embargo, sigue habiendo problemas con las causticas, las cuales tiene mucho ruido, y ademas, ahora se puede apreciar el ruido introducido por los rebotes especulares y la refraccion del dielectrico como puntos de mucha mayor intensidad que el resto en la pared trasera.
+ 
+ \subsection{Interesting Image}
+En esta imagen de ejemplo, se pueden observar la gran mayoria de efectos que se peuden conseguir utilizando \textit{ Path Tracing} con \textit{Next-Event Estimation} utuilizando nuestra implementación.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.6\linewidth]{images/cbox_interesting_nee_512.png}
+\caption{Imagen generada utilizando \textit{Path Tracing} con \textit{Nee} y un valor bajo de absorción}
+\label{fig:disp}
+\end{figure}
+
+Para la generación de esta imagen se ha utilizado un nivel mas bajo de absorción (modelado por la probabilidad de sobrevivir a la ruleta rusa), para conseguir que la esfera del dielectrico se viera mas clara y ademas la caustica fuese mas acentuada. Sin embargo, al bajar la absorción nos encontramos con un execeso de \textit{color bleeding} en la pared del fondo. Esto es debido a que en nuestra implemetación se utiliza la misma probabilidad de sobrevivir a un rebote para todos los materiales de la escena. Sin embargo, esto en la realidad no es asi y cada material tienen un nivel de absorción distinto. Por ejemplo el nivel de absorción del cristal seria muy inferior al de las paredes, y por tanto si obtuviesemos la probabilidad de sobrevivir a un rebote del material en cuestión , en lugar de una constante global, se podrian conseguir escenas mas realistas, pudiendo eliminar el \textit{color bleeding}, sin oscurecer las esferas.   
+  
+
+\end{document}
