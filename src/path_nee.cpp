@@ -11,7 +11,7 @@ class PathTracingNee : public Integrator {
 public:
 	PathTracingNee(const PropertyList &props)
 	{
-		m_depth = props.getInteger("m_depth",5);
+		m_depth = props.getInteger("depth",5);
 		m_light_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
 	}
 
@@ -65,28 +65,14 @@ public:
 
 			Color3f brdfNee = its.mesh->getBSDF()->eval(bsdf_query);
 
-			L += (light->eval(lightRecord) * brdfNee * V * W * abs(Frame::cosTheta(bsdf_query.wi))) / (pdfDirLight * pdfL);
+			L += (light->eval(lightRecord) * brdfNee * V * W * std::max(Frame::cosTheta(bsdf_query.wi),0.0f)) / (pdfDirLight * pdfL);
 
 			//BRDF sample
 			BSDFQueryRecord bsdf_query_record(its.shFrame.toLocal(-mRay.d));
-			its.mesh->getBSDF()->sample(bsdf_query_record, sample);
-			Color3f brdf;
-			float pdfDir;
-			if (bsdf_query_record.measure == EDiscrete) {
-				brdf = Color3f(1.0f);
-				pdfDir = 1.0f;
-				difusseLight = true;
-			}
-			else {
-				brdf = its.mesh->getBSDF()->eval(bsdf_query_record);
-				pdfDir = its.mesh->getBSDF()->pdf(bsdf_query_record);
-				difusseLight = false;
-			}
+			Color3f brdf = its.mesh->getBSDF()->sample(bsdf_query_record, sample);
 
 			mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
-			if (!pdfDir == 0.0f) {
-				W *= brdf * abs(Frame::cosTheta(bsdf_query_record.wi)) / (pdfDir);
-			}
+			W *= brdf;
 		}
 		return L;
 	}

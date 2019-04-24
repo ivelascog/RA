@@ -53,7 +53,7 @@ public:
 		
 		Color3f Li = V * light->eval(lightRecord);
 
-		return Le + (Li * brdf * nx.dot(-ray.d)) / (pdfL * pdfDir);
+		return Le + (Li * brdf) / (pdfL * pdfDir);
 	}
 
 	/// Return a human-readable description for debugging purposes

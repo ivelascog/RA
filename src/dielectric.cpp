@@ -77,7 +77,7 @@ public:
 			bRec.wo = refract(bRec.wi, cosThetaT,eta);
 		}
 
-		return Color3f(0);
+		return Color3f(1.0f);
     }
 
     std::string toString() const {
