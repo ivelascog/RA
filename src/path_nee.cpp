@@ -11,8 +11,7 @@ class PathTracingNee : public Integrator {
 public:
 	PathTracingNee(const PropertyList &props)
 	{
-		p_survival = props.getFloat("Psurvival", 0.5f);
-		m_roulette_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
+		m_depth = props.getInteger("m_depth",5);
 		m_light_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
 	}
 
@@ -21,10 +20,12 @@ public:
 		Ray3f mRay = ray;
 		Intersection its;
 		Intersection itsLight;
+		int bounces = 0;
 		Color3f L(0.0f);
 		Color3f W = Color3f(1.0f);
 		bool difusseLight = true;
-		while (true) {
+		while (bounces <= m_depth) {
+			bounces++;
 
 			if (!scene->rayIntersect(mRay, its)) {
 				L += W * scene->getBackground(mRay);
@@ -44,17 +45,11 @@ public:
 				lightRecord.dist = its.t;
 				lightRecord.wi = (lightRecord.p - lightRecord.ref).normalized();
 				L += W * emmiter->eval(lightRecord);
-			}
-
-			auto rand = m_roulette_sampler->next1D();
-			if (rand < p_survival)
-			{
-				break;
-			}
+			}			
 
 			//Light Sample
 			float pdfL;
-			auto light = scene->sampleEmitter(m_light_sampler->next1D(), pdfL);
+			auto light = scene->sampleEmitter(sampler->next1D(), pdfL);
 			EmitterQueryRecord lightRecord;
 			lightRecord.ref = xl;
 			light->sample(lightRecord, sample, 0.0f);
@@ -70,7 +65,7 @@ public:
 
 			Color3f brdfNee = its.mesh->getBSDF()->eval(bsdf_query);
 
-			L += (light->eval(lightRecord) * brdfNee * V * W) / (pdfDirLight * pdfL);
+			L += (light->eval(lightRecord) * brdfNee * V * W * abs(Frame::cosTheta(bsdf_query.wi))) / (pdfDirLight * pdfL);
 
 			//BRDF sample
 			BSDFQueryRecord bsdf_query_record(its.shFrame.toLocal(-mRay.d));
@@ -90,7 +85,7 @@ public:
 
 			mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
 			if (!pdfDir == 0.0f) {
-				W *= brdf * abs(Frame::cosTheta(bsdf_query_record.wi)) / (pdfDir * p_survival);
+				W *= brdf * abs(Frame::cosTheta(bsdf_query_record.wi)) / (pdfDir);
 			}
 		}
 		return L;
@@ -102,8 +97,7 @@ public:
 	}
 
 protected:
-	float p_survival;
-	Sampler* m_roulette_sampler;
+	int m_depth;
 	Sampler* m_light_sampler;
 };
 

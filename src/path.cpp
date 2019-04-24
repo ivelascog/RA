@@ -11,7 +11,7 @@ class PathTracing : public Integrator {
 public:
 	PathTracing(const PropertyList &props)
 	{
-		p_survival = props.getFloat("Psurvival", 0.5f);
+		m_depth = props.getInteger("depth", 5);
 		m_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
 	}
 
@@ -21,10 +21,11 @@ public:
 	Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
 		Ray3f mRay = ray;
 		Intersection its;
+		int bounces = 0;
 		Color3f L(0.0f);
 		Color3f W = Color3f(1.0f);
-		while (true) {
-
+		while (bounces <= m_depth) {
+			bounces++;
 			if (!scene->rayIntersect(mRay, its)) {
 				L += W * scene->getBackground(mRay);
 				break;
@@ -45,12 +46,6 @@ public:
 				L += W * emmiter->eval(lightRecord);
 			}
 
-			auto rand = m_sampler->next1D();
-			if (rand < p_survival)
-			{
-				break;
-			}
-
 			//BRDF sample
 			BSDFQueryRecord bsdf_query_record(its.shFrame.toLocal(-mRay.d));
 			its.mesh->getBSDF()->sample(bsdf_query_record, sample);
@@ -67,7 +62,7 @@ public:
 
 			 mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
 			if (!pdfDir == 0.0f){
-				W *= brdf * abs(Frame::cosTheta(bsdf_query_record.wi)) /  (pdfDir * p_survival);
+				W *= brdf * abs(Frame::cosTheta(bsdf_query_record.wi)) /  (pdfDir );
 			}
 		}
 		return L;
@@ -79,7 +74,7 @@ public:
 	}
 
 protected:
-	float p_survival;
+	int m_depth;
 	Sampler* m_sampler;
 };
 
