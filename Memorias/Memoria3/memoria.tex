@@ -35,21 +35,23 @@ En esta sección se pedía implementar un método de \textit{Path Tracing} bási
 
 Debido a las similitudes con el algoritmo de \textit{direct\_mats} se decidió utilizar este como base. En primer lugar se añadieron una serie de variables: \textit{L}, la cual almacena la iluminación total calculada para un punto en concreto y que es inicializada a 0; \textit{W}, que almacena todos los multiplicadores, como la brdf, pdfs, etc. que se irán acumulando tras los sucesivos rebotes, siendo inicializada a 1; y por último, una variable que representa el rayo que se está tratando, \textit{mRay}, y que se inicializa con el primer rayo trazado desde la cámara.\\
 
-Seguidamente se ha implementado un bucle infinito que se encargara de computar la iluminación en sí. En primer lugar se comprueba si el rayo que se esta trazando en ese momento interseca con la geometría de la escena. De no hacerlo, se suma a la iluminación total del punto la iluminación proporcionada por el ambiente multiplicada por todas las interacciones de la luz (\textit{W}) y se devuelve la iluminación total calculada. En el caso de que el rayo sí interseque con geometría de la escena, se comprueba si ha intersecado con una fuente de luz y, de hacerlo, se suma la iluminación de esa fuente de luz multiplicada por \textit{W} a la iluminación total en el punto.
+Seguidamente se ha implementado un bucle que se encargara de computar la iluminación en sí. En primer lugar se comprueba si el rayo que se esta trazando en ese momento interseca con la geometría de la escena. De no hacerlo, se suma a la iluminación total del punto la iluminación proporcionada por el ambiente multiplicada por todas las interacciones de la luz (\textit{W}) y se devuelve la iluminación total calculada. En el caso de que el rayo sí interseque con geometría de la escena, se comprueba si ha intersecado con una fuente de luz y, de hacerlo, se suma la iluminación de esa fuente de luz multiplicada por \textit{W} a la iluminación total en el punto.\\
 
-Posteriormente se comprueba si se debe de seguir trazando rayos por el método de ruleta rusa, comprobando si un número aleatorio (obtenido de forma independiente a los valores de muestreo) es menor que la probabilidad de que continue el rayo, en cuyo caso se termina de iterar el bucle de iluminación y se devuelve la iluminación calculada hasta el momento. En caso de que se deba de seguir trazando rayos, se muestrea la BRDF del material con el que se ha intersecado y se calcula el nuevo rayo a utilizar (\textit{mRay}). Además, se actualiza el valor de \textit{W} con las características de este nuevo rebote de la siguiente forma:
-$$W *= \frac{brdf * cos\theta}{pdf_{dir} * pdf_{surv}}$$\\
+Seguidamente para seguir trazando nuevos rayos, se muestrea la BRDF del material con el que se ha intersecado y se calcula el nuevo rayo a utilizar (\textit{mRay}). Además, se actualiza el valor de \textit{W} con las características de este nuevo rebote de la siguiente forma:
+$$W *= \frac{brdf * cos\theta}{pdf_{dir}}$$\\
 
-Donde $\theta$ es el ángulo entre la normal del punto a tratar y el ángulo de salida del rayo, y $pdf_{surv}$ es la probabilidad de supervivencia de un rebote. Este último término es necesario añadirlo debido a la utilización del método de ruleta rusa para terminar con los rebotes de la luz.\\
+Donde $\theta$ es el ángulo entre la normal del punto a tratar y el ángulo de salida del rayo. \\
+
+Como metodo de terminación de los rayos se ha optado por un metodo basado en la profundidad de los rebotes realizando tantos rebotes (pasadas al bucle de iluminación) como rebotes se deban calcular.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=.6\linewidth]{images/cbox_path_512.png}
-\caption{Imagen generada utilizando \textit{Path Tracing} simple}
+\caption{Imagen generada utilizando \textit{Path Tracing} simple (512 muestras)}
 \label{fig:disp}
 \end{figure}
 
-Como puede verse en la imagen se han conseguido varios efectos de iluminación global, como son los reflejos en la esfera de espejo o la cáustica en la esfera que representa un cristal, además de un ligero \textit{color bleeding} en el techo proveniente de las paredes. Sin embargo, se aprecia una gran cantidad de ruido tanto en las paredes como en los reflejos. Además en el dieléctrico, aunque se puede observar que la luz puede pasar a través de el, se ve prácticamente negro debido a la dificultad de encontrar un camino que lo atraviese y llegue a una fuente de luz, mientras que la cáustica que genera sí tiene una apariencia plausible.\\
+Como puede verse en la imagen se han conseguido varios efectos de iluminación global, como son los reflejos en la esfera de espejo o la cáustica en la esfera que representa un cristal, además de un ligero \textit{color bleeding} en el techo proveniente de las paredes. Sin embargo, se aprecia una gran cantidad de ruido tanto en las paredes como en los reflejos, teniendo en cuenta la gran cantidad de muestras utilizadas (512).\\
 
 Por otro lado, la convergencia de la imagen no es muy buena debido a que solamente los caminos que intersequen con una fuente de luz contribuirán a la iluminación final. Por lo tanto, una gran cantidad de muestras se desperdician al no encontrar la luz.
 
@@ -65,12 +67,12 @@ Adicionalmente hay que tener en cuenta que al incluir un rayo directo a la luz p
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=.6\linewidth]{images/cbox_pathNee_512.png}
-\caption{Imagen generada utilizando \textit{Path Tracing} con \textit{Nee}}
+\includegraphics[width=.6\linewidth]{images/cbox_pathNee_128.png}
+\caption{Imagen generada utilizando \textit{Path Tracing} con \textit{Nee} (128 muestras)}
 \label{fig:disp}
 \end{figure}
 
-Como puede observarse en la imagen, se ha conseguido el resultado esperado obteniendo muchísima mejor convergencia a igual numero de muestras para esta escena, donde ha mejorado tanto la iluminación de las paredes como los reflejos y sobre todo el interior del dieléctrico, que ya no es tan negro. Sin embargo, sigue habiendo problemas con un exceso de ruido en las cáusticas, y además ahora se puede apreciar en la pared trasera un nuevo ruido, introducido por los rebotes especulares y la refracción del dielectrico, como puntos de mucha mayor intensidad que el resto.
+Como puede observarse en la imagen, se ha conseguido el resultado esperado obteniendo muchísima mejor convergencia con un numero mucho inferior de muestas para esta escena, donde ha mejorado tanto la iluminación de las paredes como los reflejos . Sin embargo, sigue existiendo ruido de alta frecuencia introducido por los rebotes especulares y las refracciones de los materiales que este metodo no elimina, pero podrian reducirse implementando \textit{Multiple Importance Sampling}.\\
  
  \subsection{Interesting Image}
 En esta imagen de ejemplo se pueden observar la mayoría de efectos que se peuden conseguir utilizando \textit{Path Tracing} con \textit{Next-Event Estimation} utilizando nuestra implementación.

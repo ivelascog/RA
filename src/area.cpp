@@ -45,7 +45,8 @@ public:
 			return 0.0f;
 		} else
 		{
-			return m_radiance / std::pow(lRec.dist,2);
+			return  m_radiance;
+			//return m_radiance / std::pow(lRec.dist,2);
 		}
 
 	}
@@ -62,6 +63,7 @@ public:
 		Vector3f refToP = lRec.p - lRec.ref;
 		lRec.dist = refToP.norm();
 		lRec.wi = (lRec.p - lRec.ref).normalized();
+		lRec.emitter = this;
 		return 0.0f; //TODO  Ni idea de que se supone que tiene que devolver esto.
 	}
 
@@ -73,9 +75,9 @@ public:
 			throw NoriException("There is no shape attached to this Area light!");
 
 		//Area to solid-angle
-		float solidAnglePdf = lRec.pdf  * (lRec.dist / abs(lRec.n.dot(lRec.wi)));
+		float solidAnglePdf = lRec.pdf  * (lRec.dist * lRec.dist / abs(lRec.n.dot(lRec.wi)));
 
-		return solidAnglePdf;
+ 		return solidAnglePdf;
 	}
 
 

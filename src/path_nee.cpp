@@ -19,7 +19,6 @@ public:
 	Color3f Li(const Scene *scene, Sampler *sampler, const Ray3f &ray) const {
 		Ray3f mRay = ray;
 		Intersection its;
-		Intersection itsLight;
 		int bounces = 0;
 		Color3f L(0.0f);
 		Color3f W = Color3f(1.0f);
@@ -34,7 +33,6 @@ public:
 
 			Point3f xl = its.p;
 			Normal3f nx = its.shFrame.n;
-			Point2f sample = sampler->next2D();
 			if (its.mesh->isEmitter() && difusseLight)
 			{
 				EmitterQueryRecord lightRecord;
@@ -52,30 +50,33 @@ public:
 			auto light = scene->sampleEmitter(sampler->next1D(), pdfL);
 			EmitterQueryRecord lightRecord;
 			lightRecord.ref = xl;
-			light->sample(lightRecord, sample, 0.0f);
+			light->sample(lightRecord, sampler->next2D(), 0.0f);
 			float pdfDirLight = light->pdf(lightRecord);
 			Intersection itsShadow;
-			Ray3f shadowRay(xl, lightRecord.wi);
+			Ray3f shadowRay(xl, lightRecord.wi, 0.1f, INFINITY);
 			bool V = scene->rayIntersect(shadowRay, itsShadow);
+	
 			V = V && itsShadow.mesh->isEmitter() && itsShadow.mesh->getEmitter() == light;
 
 			//Eval BRDF
 
-			BSDFQueryRecord bsdf_query{ its.shFrame.toLocal(-ray.d),its.shFrame.toLocal(lightRecord.wi),ESolidAngle };
+			BSDFQueryRecord bsdf_query{ its.shFrame.toLocal(-mRay.d),its.shFrame.toLocal(lightRecord.wi),ESolidAngle };
 
 			Color3f brdfNee = its.mesh->getBSDF()->eval(bsdf_query);
 
-			L += (light->eval(lightRecord) * brdfNee * V * W * std::max(Frame::cosTheta(bsdf_query.wi),0.0f)) / (pdfDirLight * pdfL);
+			L += (light->eval(lightRecord) * brdfNee * V * W * abs(Frame::cosTheta(bsdf_query.wo)))/ (pdfDirLight * pdfL);
 
 			//BRDF sample
 			BSDFQueryRecord bsdf_query_record(its.shFrame.toLocal(-mRay.d));
-			Color3f brdf = its.mesh->getBSDF()->sample(bsdf_query_record, sample);
+			Color3f brdf = its.mesh->getBSDF()->sample(bsdf_query_record, sampler->next2D());
+			difusseLight = EDiscrete == bsdf_query_record.measure;
 
 			mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
 			W *= brdf;
 		}
 		return L;
 	}
+
 
 	/// Return a human-readable description for debugging purposes
 	std::string toString() const {

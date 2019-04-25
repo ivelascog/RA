@@ -28,13 +28,13 @@ public:
 			EmitterQueryRecord lightRecord;
 			auto emmiter = its.mesh->getEmitter();
 			lightRecord.wi = ray.d;
-			lightRecord.dist = 0.1f;
+			lightRecord.dist = 1.0f;
 			Le = emmiter->eval(lightRecord);
 		}
 
 		//sample Light
 		float pdfL;
-		auto light = scene->sampleEmitter(sample.x(), pdfL);
+		auto light = scene->sampleEmitter(sampler->next1D(), pdfL);
 		EmitterQueryRecord lightRecord;
 		lightRecord.ref = xl;
 		light->sample(lightRecord, sample, 0.0f);
@@ -53,7 +53,7 @@ public:
 		
 		Color3f Li = V * light->eval(lightRecord);
 
-		return Le + (Li * brdf) / (pdfL * pdfDir);
+ 		return Le + (Li * brdf * Frame::cosTheta(bsdf_query.wo)) / (pdfL * pdfDir);
 	}
 
 	/// Return a human-readable description for debugging purposes

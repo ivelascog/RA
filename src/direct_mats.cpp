@@ -55,7 +55,7 @@ public:
 				emitter_query_record.p = its.p;
 				emitter_query_record.n = its.shFrame.n;
 				Vector3f refToP = its.p - xl;
-				emitter_query_record.dist = refToP.norm();
+				emitter_query_record.dist = its.t;
 				emitter_query_record.wi = refToP.normalized();
 				emitter_query_record.pdf = 1.0f;
 				Li = light->eval(emitter_query_record);

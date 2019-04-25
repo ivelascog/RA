@@ -59,7 +59,7 @@ void Scene::activate() {
 const Emitter * Scene::sampleEmitter(float rnd, float &pdf) const {
 	auto const & n = m_emitters.size();
 	size_t index = std::min(static_cast<size_t>(std::floor(n*rnd)), n - 1);
-	pdf = 1 / n;
+	pdf = 1.0f / n;
 	return m_emitters[index];
 }
 

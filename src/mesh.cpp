@@ -139,10 +139,6 @@ void Mesh::sampleTriangle(const Point2f &sample, Point3f &p, Normal3f&n, size_t 
 	Point2f s = Warp::squareToTent(sample);
 
 	Point3f barCoords(s(0), s(1), 1 - s(0) - s(1));
-	if (barCoords.sum() > 1)
-	{
-		printf("Liada parda");
-	}
 
 	p = (barCoords[0] * p0 + barCoords[1] * p1 + barCoords[2] * p2);
 	n = (barCoords[0] * n0 + barCoords[1] * n1 + barCoords[2] * n2);
