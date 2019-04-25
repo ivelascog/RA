@@ -42,7 +42,7 @@ $$W *= \frac{brdf * cos\theta}{pdf_{dir} * pdf_{surv}}$$\\
 
 Donde $\theta$ es el ángulo entre la normal del punto a tratar y el ángulo de salida del rayo, y $pdf_{surv}$ es la probabilidad de supervivencia de un rebote. Este último término es necesario añadirlo debido a la utilización del método de ruleta rusa para terminar con los rebotes de la luz.\\
 
-Además del metodo de terminación por ruleta rusa tambien se ha implementado la terminación por un número fijo de rebotes, el cual es configurable y deberá ser un valor elevado para que en la mayoria de los casos actúe la ruleta rusa, siendo su finalidad la de evitar bucles casi infinitos si la probabilidad de terminación por ruleta rusa es excesivamente baja.\\
+Además del metodo de terminación por ruleta rusa tambien se ha implementado la terminación por un número fijo de rebotes, el cual es configurable y deberá ser un valor elevado para que en la mayoría de los casos actúe la ruleta rusa, siendo su finalidad la de evitar bucles casi infinitos si la probabilidad de terminación por ruleta rusa es excesivamente baja.\\
 
 \begin{figure}[h]
 \centering
