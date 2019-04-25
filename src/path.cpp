@@ -46,12 +46,17 @@ public:
 				L += W * emmiter->eval(lightRecord);
 			}
 
+			float p_roulete = std::max(W.x(), std::max(W.y(), W.z()));
+			if (sampler->next1D() > p_roulete) {
+				break;
+			}
+
 			//BRDF sample
 			BSDFQueryRecord bsdf_query_record(its.shFrame.toLocal(-mRay.d));
 			Color3f brdf = its.mesh->getBSDF()->sample(bsdf_query_record, sample);
 			
 			 mRay = Ray3f(xl, its.shFrame.toWorld(bsdf_query_record.wo));
-			 W *= brdf;
+			 W *= brdf / p_roulete;
 		}
 		return L;
 	}
