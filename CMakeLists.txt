@@ -94,6 +94,7 @@ add_executable(nori
   src/direct_mats.cpp
   src/path.cpp
   src/path_nee.cpp;
+  src/perspective_DoF.cpp
 )
 
 add_definitions(${NANOGUI_EXTRA_DEFS})
