@@ -115,7 +115,8 @@ void Scene::addChild(NoriObject *obj) {
 
 Color3f Scene::getBackground(const Ray3f& ray) const
 {
-	return Color3f(0.0f);
+	EmitterQueryRecord record;
+	return m_enviromentalEmitter->eval(record);
 }
 
 
