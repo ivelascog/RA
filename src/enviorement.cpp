@@ -22,7 +22,7 @@ public:
 	}
 
 	virtual Color3f eval(const EmitterQueryRecord & lRec) const {
-		return Color3f(0.5f);
+		return m_texture(0,0);
 	}
 
 	virtual Color3f sample(EmitterQueryRecord & lRec, const Point2f & sample, float optional_u) const {
