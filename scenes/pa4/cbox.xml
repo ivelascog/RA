@@ -3,11 +3,11 @@
 <scene>
 	<integrator type="pathtracer"/>
 
-	<camera type="perspective">
+	<camera type="perspective_dof">
 		<float name="fov" value="70"/>
 		<transform name="toWorld">
-			<scale value="-1,1,1"/>
-			<lookat target="0, 0.893051, 4.41198" origin="0, 0.919769, 5.41159" up="0, 1, 0"/>
+			<scale value="1,1,1"/>
+      <lookat target="0, 0.893051, 4.41198" origin="0, 0.919769, 5.41159" up="0, 1, 0"/>
 		</transform>
 
 		<integer name="height" value="600"/>
@@ -23,6 +23,12 @@
 	<sampler type="independent">
 		<integer name="sampleCount" value="128"/>
 	</sampler>
+
+  <mesh type="obj">
+    <string name="filename" value="meshes/sphere2.obj"/>
+
+    <bsdf type="dielectric"/>
+  </mesh>
 
 	<!--<mesh type="obj">
 		<string name="filename" value="meshes/walls.obj"/>	
