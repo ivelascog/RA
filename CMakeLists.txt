@@ -95,7 +95,7 @@ add_executable(nori
   src/path.cpp
   src/path_nee.cpp;
   src/perspective_DoF.cpp
-  src/enviorement.cpp
+  src/environment.cpp
 )
 
 add_definitions(${NANOGUI_EXTRA_DEFS})
