@@ -12,7 +12,7 @@
 
 		<integer name="height" value="600"/>
 		<integer name="width" value="800"/>
-		<float name="focalDistance" value="4"/>
+		<float name="focalDistance" value="20"/>
 		<float name="lensRadius" value="0.1"/>
 	</camera>
 
@@ -21,7 +21,7 @@
 	</emitter>
 	
 	<sampler type="independent">
-		<integer name="sampleCount" value="512"/>
+		<integer name="sampleCount" value="128"/>
 	</sampler>
 
   <!--<mesh type="obj">
@@ -58,7 +58,7 @@
   <mesh type="obj">
     <string name="filename" value="meshes/esfera-dentro.obj"/>
 
-    <bsdf type="mirror"/>
+    <bsdf type="dielectric"/>
   </mesh>
   
   <mesh type="obj">
