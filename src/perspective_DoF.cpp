@@ -113,10 +113,9 @@ NORI_NAMESPACE_BEGIN
 			{
 				Point2f pLens = m_lensRadius * Warp::squareToUniformDisk(apertureSample);
 				float ft = m_focalDistance / ray.d.z();
-				Point3f pFocus = (ray)(-ft);
+				Point3f pFocus = (ray)(ft);
 
 				Point3f o = Point3f(pLens.x(), pLens.y(), 0);
-				Vector3f d = (pFocus - ray.o).normalized();
 				ray.o = m_cameraToWorld * o;
 				ray.d = (pFocus - ray.o).normalized();
 				ray.update();
