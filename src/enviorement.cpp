@@ -29,13 +29,22 @@ public:
 	}
 
 	virtual Color3f eval(const EmitterQueryRecord & lRec) const {
-		Vector3f w = lRec.wi;
+		Vector3f w = lRec.wi.normalized();
 		Point2f uv(
-			(atan2(w.x(), -w.z())) * INV_TWOPI,
-			std::acos(clamp(w.y(),-1,1)) * INV_PI
+			(atan(w.y() / w.x())) * INV_TWOPI,
+			std::acos(clamp(w.z(),-1,1)) * INV_PI
 		);
-		uv[0] = std::max(uv[0], 0.0f);
-		return m_texture(uv.y() * (m_texture.rows() - 1), uv.x() * (m_texture.cols() - 1));
+		if (uv.x() < 0.0f || uv.x() > 1.0f)
+		{
+			//std::cout << "Error X: " << uv.x() << std::endl;
+			uv[0] = abs(uv[0]);
+		}
+
+		if (uv.y() < 0.0f || uv.y() > 1.0f)
+		{
+			std::cout << "Error Y" << std::endl;
+		}
+		return m_texture(uv.x() * (m_texture.cols() - 1), uv.y() * (m_texture.rows() - 1));
 	}
 
 	virtual Color3f sample(EmitterQueryRecord & lRec, const Point2f & sample, float optional_u) const {

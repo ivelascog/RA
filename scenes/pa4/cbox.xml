@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 
 <scene>
-	<integrator type="pathtracer_nee"/>
+	<integrator type="pathtracer"/>
 
-	<camera type="perspective_dof">
+	<camera type="perspective">
 		<float name="fov" value="27.7856"/>
 		<transform name="toWorld">
 			<scale value="-1,1,1"/>
@@ -24,7 +24,7 @@
 		<integer name="sampleCount" value="128"/>
 	</sampler>
 
-	<mesh type="obj">
+	<!--<mesh type="obj">
 		<string name="filename" value="meshes/walls.obj"/>	
 
 		<bsdf type="diffuse">
@@ -78,5 +78,5 @@
 		<emitter type="area">
 			<color name="radiance" value="40 40 40"/>
 		</emitter>
-	</mesh>
+	</mesh>-->
 </scene>
