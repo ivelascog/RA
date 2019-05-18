@@ -3,11 +3,11 @@
 <scene>
 	<integrator type="pathtracer"/>
 
-	<camera type="perspective_dof">
+	<camera type="perspective">
 		<float name="fov" value="70"/>
 		<transform name="toWorld">
 			<scale value="1,1,1"/>
-      <lookat target="0, 0.893051, 4.41198" origin="0, 0.919769, 5.41159" up="0, 1, 0"/>
+      <lookat target="0, 5, 0" origin="0, 6, -20" up="0, 1, 0"/>
 		</transform>
 
 		<integer name="height" value="600"/>
@@ -21,14 +21,55 @@
 	</emitter>
 	
 	<sampler type="independent">
-		<integer name="sampleCount" value="128"/>
+		<integer name="sampleCount" value="512"/>
 	</sampler>
 
-  <mesh type="obj">
-    <string name="filename" value="meshes/sphere2.obj"/>
+  <!--<mesh type="obj">
+    <string name="filename" value="meshes/esfera-dentro.obj"/>
 
     <bsdf type="dielectric"/>
+  </mesh>-->
+
+  <mesh type="obj">
+    <string name="filename" value="meshes/base-bronce.obj"/>
+
+    <bsdf type="diffuse">
+      <color name="albedo" value="0.84 0.39 0.11"/>
+    </bsdf>
   </mesh>
+
+  <mesh type="obj">
+    <string name="filename" value="meshes/base-metal.obj"/>
+
+    <bsdf type="mirror"/>
+    <!--<bsdf type="diffuse">
+      <color name="albedo" value="0.7 0.7 0.7"/>
+    </bsdf>-->
+  </mesh>
+
+  <mesh type="obj">
+    <string name="filename" value="meshes/esfera-achata.obj"/>
+
+    <bsdf type="diffuse">
+      <color name="albedo" value="0.84 0.39 0.11"/>
+    </bsdf>
+  </mesh>
+
+  <mesh type="obj">
+    <string name="filename" value="meshes/esfera-dentro.obj"/>
+
+    <bsdf type="mirror"/>
+  </mesh>
+  
+  <mesh type="obj">
+    <string name="filename" value="meshes/soportes.obj"/>
+
+    <bsdf type="diffuse">
+      <color name="albedo" value="0.02 0.996 1"/>
+    </bsdf>
+  </mesh>
+
+
 
 	<!--<mesh type="obj">
 		<string name="filename" value="meshes/walls.obj"/>	

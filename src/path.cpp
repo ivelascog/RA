@@ -11,7 +11,7 @@ class PathTracing : public Integrator {
 public:
 	PathTracing(const PropertyList &props)
 	{
-		m_depth = props.getInteger("depth", 5);
+		m_depth = props.getInteger("depth", 100);
 		m_sampler = static_cast<Sampler*> (NoriObjectFactory::createInstance("independent", PropertyList()));
 	}
 

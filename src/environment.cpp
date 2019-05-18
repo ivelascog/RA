@@ -37,6 +37,7 @@ public:
 		);
 		int x = uv.x() * (m_texture.cols() - 1);
 		x = (int)x % m_texture.cols();
+		x = x >= 0 ? x : x + m_texture.cols();
 		int y = uv.y() * (m_texture.rows() - 1);
 		y = clamp(y, 0, m_texture.rows() - 1);
 		return m_texture(y, x);
