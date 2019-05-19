@@ -43,7 +43,7 @@ Para esta entrega debían añadirse al \emph{Path Tracer} desarrollado durante l
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=1\linewidth]{images/escena_2400x1800_128spp_dof0-0_tonemapped.png}
+\includegraphics[width=1\linewidth]{images/escena_2400x1800_128spp_dof0-0_screencap.png}
 \caption{Render sin DoF}
 \label{fig:disp}
 \end{figure}
@@ -54,13 +54,13 @@ En primer lugar, muestreamos de manera aleatoria un punto en la lente que será 
 
 %\begin{figure}[h]
 %\centering
-%\includegraphics[width=1\linewidth]{images/escena_2400x1800_128spp_dof20-03_tonemapped.png}
+%\includegraphics[width=1\linewidth]{images/escena_2400x1800_128spp_dof20-03_screencap.png}
 %\caption{Render con DoF: Distancia focal: 20, Radio lente: 0.3}
 %\label{fig:disp}
 %\end{figure}
 \begin{figure}[h]
 \centering
-\includegraphics[width=1\linewidth]{images/escena_2400x1800_128spp_dof20-1_tonemapped.png}
+\includegraphics[width=1\linewidth]{images/escena_2400x1800_128spp_dof20-1_screencap.png}
 \caption{Render con DoF: Distancia focal 20:, Radio lente: 1}
 \label{fig:disp}
 \end{figure}
@@ -93,7 +93,7 @@ El resultado es que dado un rayo, se obtienen las coordenadas del pixel más cer
 \section{Otros efectos}
 Además de los efectos añadidos para esta entrega, se ha hecho uso de los efectos implementados en entregas previas. Para demostrarlo, se han renderizado dos versiones finales de la imagen, uno mediante el uso de una esfera reflectiva perfecta (equivalente a la imagen motivacional) y otro mediante el uso de una esfera dieléctrica. Las dos imágenes pueden verse al final del documento, en la sección de resultados.\\
 
-También se emplean técnicas implementadas, como la de ruleta rusa.
+También se emplean otras técnicas implementadas en anteriores entregas, como la de ruleta rusa.
 
 \section{Dificultades encontradas}
 Principalmente las dificultades se han encontrado a la hora de implementar los \emph{Environment Maps}. Aunque la información estaba disponible en los recursos habituales, llegar a filtrar la información útil ha sido complicado y ha sido necesario reimplementar un mismo algoritmo de varias formas diferentes hasta conseguir los resultados esperados. \\
@@ -110,14 +110,14 @@ Como resultado final tenemos un render que representa fielmente la reflexión y 
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=1\linewidth]{images/escena_2400x1800_2048spp_dof20-03_tonemapped.png}
+\includegraphics[width=1\linewidth]{images/escena_2400x1800_2048spp_dof20-03_screencap.png}
 \caption{Esfera dieléctrica - 2400x1800 2048spp - Distancia focal: 20, Radio lente: 0.3}
 \label{fig:disp}
 \end{figure}
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=1\linewidth]{images/escenamirror_2400x1800_2048spp_dof20-03_tonemapped.png}
+\includegraphics[width=1\linewidth]{images/escenamirror_2400x1800_2048spp_dof20-03_screencap.png}
 \caption{Esfera espejo - 2400x1800 2048spp - Distancia focal: 20, Radio lente: 0.3}
 \label{fig:disp}
 \end{figure}
