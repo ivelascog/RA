@@ -8,9 +8,9 @@
 #include <cmath>
 NORI_NAMESPACE_BEGIN
 
-class Enviorement: public Emitter {
+class Environment: public Emitter {
 public:
-	Enviorement(const PropertyList &props) {
+	Environment(const PropertyList &props) {
 		m_type = EmitterType::EMITTER_ENVIRONMENT;
 		m_filename = getFileResolver()->resolve(props.getString("filename"));
 		m_texture = Bitmap(m_filename.str());
@@ -57,5 +57,5 @@ private:
 };
 
 
-NORI_REGISTER_CLASS(Enviorement, "enviorement")
+NORI_REGISTER_CLASS(Environment, "environment")
 NORI_NAMESPACE_END
