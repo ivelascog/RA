@@ -48,9 +48,9 @@ Para esta entrega debían añadirse al \emph{Path Tracer} desarrollado durante l
 \label{fig:disp}
 \end{figure}
 
-Para implementar el \textit{Depth of Field} hemos creado una nueva cámara que sigue el modelo de lente "delgada", en el que solamente existe una lente y el grosor de esta es pequeño en relación a su radio. Para ello se va a incluir el efecto que produciría esta lente a la hora de muestrear un nuevo rayo desde la cámara.\\
+Para implementar el \textit{Depth of Field} hemos creado una nueva cámara que sigue una aproximación de lente "delgada" (\textit{thin lens}), en el que solamente existe una lente y el grosor de esta es pequeño en relación a su radio. Para ello se va a incluir el efecto que produciría esta lente a la hora de muestrear un nuevo rayo desde la cámara.\\
 
-En primer lugar, muestreamos de manera aleatoria un punto en la lente que será utilizado como origen del nuevo rayo. Para hacerlo muestreamos de manera uniforme un disco de radio 1 y multiplicamos el resultado por el radio elegido para la lente en cuestion. A continuación se obtiene el punto de enfoque, para ello en primer lugar es necesario determinar la distancia, siguiendo el rayo sin perturbar, hasta el plano de enfoque. Esta distancia se obtiene mediante la operación $focalDistance/ ray\_dir.z$, y con este dato obtenemos el punto de enfoque desplazándonos esa distancia por el rayo.\\
+En primer lugar, muestreamos de manera aleatoria un punto en la lente que será utilizado como origen del nuevo rayo. Para hacerlo muestreamos de manera uniforme un disco de radio 1 y multiplicamos el resultado por el radio elegido para la lente en cuestion. A continuación se obtiene el punto de enfoque, para ello en primer lugar es necesario determinar la distancia, siguiendo el rayo sin perturbar, hasta el plano de enfoque, es decir el plano donde no existe circulo de confusión y un punto en la escena corresponde con un punto en el plano de imagen. Esta distancia se obtiene mediante la operación $focalDistance/ ray\_dir.z$, y con este dato obtenemos el punto de enfoque desplazándonos esa distancia por el rayo.\\
 
 %\begin{figure}[h]
 %\centering
@@ -67,7 +67,7 @@ En primer lugar, muestreamos de manera aleatoria un punto en la lente que será 
 
 Por último, actualizamos el rayo tomando como punto de inicio el punto muestreado sobre la lente, multiplicado este por la matriz de cámara, y como nueva dirección utilizamos el vector que une el origen del nuevo rayo y el punto de enfoque.\\
 
-Los parámetros de \emph{Depth of Field} se han expuesto en la configuración de escena como parámetros de la cámara llamados \emph{focalDistance} y \emph{lensRadius}, definiendo la distancia focal y el radio de la lente, respectivamente. Estos parámetros son de tipo float.
+Los parámetros de \emph{Depth of Field} se han expuesto en la configuración de escena como parámetros de la cámara llamados \emph{focalDistance} y \emph{lensRadius}, definiendo la distancia focal y el radio de la lente (o apertura), respectivamente. Estos parámetros son de tipo float. Es interesante resaltar que a menor radio de la lente menor sera el efecto producido por el \textit{Depth of Field}, ya que el area de los circulos de confusión de los puntos fuera del plano de enfoque seran menores, ya que mientras mas pequeña sea esa lente mas nos estaremos acercando a la camara \textit{pin-hole} ideal con apertura infinitamente pequeña.
 
 \newpage
 
